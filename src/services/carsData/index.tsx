@@ -20,7 +20,7 @@ export const DRS_VALUES = {
  * @param {number | "latest"} sessionKey ID of the session
  * @param {number} driverNumber number of the driver
  * @param {Date} date the start date for filtering data
- * @returns {CarData[]} array of Cardata
+ * @returns {CarData[]} array of cars data
  */
 export const getCarsData = async (
   sessionKey?: number | "latest",
