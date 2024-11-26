@@ -7,4 +7,5 @@ export interface TeamRadioDTO {
   date: Date;
   recording_url: string;
 }
+
 export type TeamRadio = CamelizeKeys<TeamRadioDTO>;

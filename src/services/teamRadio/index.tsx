@@ -4,12 +4,12 @@ import {toCamel} from "@utils/object";
 import {TeamRadio, TeamRadioDTO} from "./types";
 
 /**
- * Returns a list of radioTeam
+ * Returns a list of radio exchanges
  * @param {number | "latest"} sessionKey ID of the Session
- * @param {number | "latest"} driverNumber the number of the driver
+ * @param {number} driverNumber the number of the driver
  * @returns {TeamRadio[]} array of radio exchanges
  */
-export const getRadioTeam = async (
+export const getRadioExchanges = async (
   sessionKey?: number | "latest",
   driverNumber?: number
 ): Promise<TeamRadio[]> => {

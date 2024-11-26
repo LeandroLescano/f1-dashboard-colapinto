@@ -16,7 +16,7 @@ export const DRS_VALUES = {
 };
 
 /**
- * Returns a list of Cardata
+ * Returns a list of cars data
  * @param {number | "latest"} sessionKey ID of the session
  * @param {number} driverNumber number of the driver
  * @param {Date} date the start date for filtering data

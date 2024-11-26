@@ -10,4 +10,5 @@ export interface StintDTO {
   compound: string;
   tyre_age_at_start: number;
 }
+
 export type Stint = CamelizeKeys<StintDTO>;
