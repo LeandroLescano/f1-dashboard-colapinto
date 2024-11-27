@@ -16,7 +16,7 @@ export default function Leaderboard() {
       duration_sector_2: 32.843,
       duration_sector_3: 36.953,
       segments_sector_1: [null, 2048, 2048, 2048, 2048, 2048],
-      segments_sector_2: [2048, 2048, 2048, 2048, 2048, 2048, 2048],
+      segments_sector_2: [2048, 2048, 2048, 2048, 2048, 2048, 2051],
       segments_sector_3: [2048, 2048, 2048, 2048, 2048, 2048, 2049, 2049],
       lap_number: 25,
     },

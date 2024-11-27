@@ -1,5 +1,6 @@
 import React from "react";
 
+import clsx from "clsx";
 import {SegmentDisplayProps} from "./types";
 
 export default function SegmentDisplay({
@@ -13,15 +14,12 @@ export default function SegmentDisplay({
           {segments.map((segment, index) => (
             <div
               key={`sector-${index}`}
-              className={`w-2 h-2 rounded-full ${
-                segment === 2048
-                  ? "bg-yellow-500"
-                  : segment === 2049
-                  ? "bg-green-500"
-                  : segment === 2051
-                  ? "bg-purple-500"
-                  : "bg-gray-500"
-              }`}
+              className={clsx(
+                "w-2 h-2 rounded-full bg-gray-500",
+                {["bg-yellow-500"]: segment === 2048},
+                {["bg-green-500"]: segment === 2049},
+                {["bg-purple-500"]: segment === 2051}
+              )}
               title={`Segment ${index + 1}: ${segment}`}
             />
           ))}
