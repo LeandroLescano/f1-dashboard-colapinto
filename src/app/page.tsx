@@ -1,3 +1,10 @@
+"use client";
+import TableRadioTeams from "../components/TableRadioTeams";
+
 export default function Home() {
-  return <div>F1 Dashboard Colapinto</div>;
+  return (
+    <div>
+      <TableRadioTeams />
+    </div>
+  );
 }
