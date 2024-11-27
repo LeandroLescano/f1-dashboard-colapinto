@@ -54,7 +54,7 @@ const AudioPlayer = ({src}: {src: string}) => {
         max="100"
         value={progress}
         onChange={handleSeek}
-        style={{width: "100%"}}
+        className="w-[300px]"
       />
     </div>
   );
