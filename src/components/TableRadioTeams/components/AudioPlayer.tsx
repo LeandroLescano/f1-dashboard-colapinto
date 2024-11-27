@@ -1,3 +1,4 @@
+import {Icon, PauseCircleIcon, PlayCircleIcon} from "lucide-react";
 import React, {useRef, useState} from "react";
 
 const AudioPlayer = ({src}: {src: string}) => {
@@ -38,15 +39,20 @@ const AudioPlayer = ({src}: {src: string}) => {
   };
 
   return (
-    <div className="w-full flex flex-row items-center flex-start gap-3">
+    <div className="flex flex-row items-center flex-start gap-2">
       <audio
         ref={audioRef}
         src={src}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
       ></audio>
+
       <button onClick={handlePlayPause}>
-        {audioRef.current?.paused ? "Play" : "Pause"}
+        {audioRef.current?.paused ? (
+          <PlayCircleIcon size={30} />
+        ) : (
+          <PauseCircleIcon size={30} />
+        )}
       </button>
       <input
         type="range"
@@ -54,7 +60,7 @@ const AudioPlayer = ({src}: {src: string}) => {
         max="100"
         value={progress}
         onChange={handleSeek}
-        className="w-[300px]"
+        className="drag_input w-[200px]"
       />
     </div>
   );

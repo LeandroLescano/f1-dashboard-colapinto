@@ -5,25 +5,36 @@ import {TeamRadio} from "@services/teamRadio/types";
 import {getRadioExchanges} from "@services/teamRadio";
 import {getDrivers} from "@services/drivers";
 import {Driver} from "@services/drivers/types";
-import {getContrastColor} from "@utils/colors";
 import AudioPlayer from "./components/AudioPlayer";
+import SkeletonTable from "./components/SkeletonTable";
+import moment from "moment";
+import clsx from "clsx";
 
 interface TeamRadioExtend extends TeamRadio {
   driver?: Driver;
 }
 
-const TableRadioTeams = ({sessionKey = "latest"}: TableRadioTeamsProps) => {
+/**
+ * @param {number | "latest"} sessionKey ID of the Session
+ * @param {number} maxHeight the number in pixels of height
+ */
+
+const TableRadioTeams = ({
+  sessionKey = "latest",
+  maxHeight = 400,
+}: TableRadioTeamsProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [radioExchanges, setRadioExchanges] = useState<TeamRadioExtend[]>([]);
 
-  const handlerFetchData = () => {
+  const handlerFetchData = async () => {
     let radiosExchangeAux: TeamRadio[] = [];
     let driversAux: Driver[] = [];
 
-    getRadioExchanges(sessionKey).then((radios) => {
+    await getRadioExchanges(sessionKey).then((radios) => {
       radiosExchangeAux = radios;
     });
-    getDrivers(sessionKey)
+    console.log({radiosExchangeAux});
+    await getDrivers(sessionKey)
       .then((drivers) => {
         driversAux = drivers;
       })
@@ -39,10 +50,9 @@ const TableRadioTeams = ({sessionKey = "latest"}: TableRadioTeamsProps) => {
           });
           return radioExchangesExtend;
         });
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -50,36 +60,57 @@ const TableRadioTeams = ({sessionKey = "latest"}: TableRadioTeamsProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col">
-      {!isLoading &&
-        radioExchanges?.map((radioExchange, i) => {
-          const driverColor =
-            radioExchange.driverNumber === 43
-              ? "#64C4FF"
-              : radioExchange.driverNumber === 30
-              ? "#6692FF"
-              : "#" + radioExchange.driver?.teamColour;
-          return (
-            <div className="flex felx-row gap-7" key={i}>
-              <h4
-                className="px-2 py-1  text-lg font-bold text-center w-[70px]"
-                style={{
-                  borderColor: driverColor,
-                  color: driverColor,
-                  backgroundColor: getContrastColor(driverColor),
-                  borderWidth: "5px",
-                  borderRadius: "20px",
-                }}
+    <div
+      className="flex flex-col gap-2 pt-2 px-2 w-fit overflow-y-scroll"
+      style={{maxHeight: `${maxHeight}px`}}
+    >
+      <SkeletonTable rowQuantity={10} isLoading={isLoading}>
+        {radioExchanges &&
+          radioExchanges.map((radioExchange, i) => {
+            const driverColor =
+              radioExchange.driverNumber === 43
+                ? "#64C4FF"
+                : radioExchange.driverNumber === 30
+                ? "#6692FF"
+                : "#" + radioExchange.driver?.teamColour;
+            return (
+              <div
+                key={i}
+                className={clsx("flex flex-col pb-4 w-fit", {
+                  "border-b-2 border-gray-500/50":
+                    i !== radioExchanges.length - 1,
+                })}
               >
-                {radioExchange.driver?.nameAcronym}
-              </h4>
-
-              <AudioPlayer src={radioExchange.recordingUrl} />
-
-              {radioExchange.driver?.driverNumber}
-            </div>
-          );
-        })}
+                <p className="font-bold text-lg text-gray-500">
+                  {moment(String(radioExchange.date)).format("HH:mm:ss")}
+                </p>
+                <div className="flex flex-row gap-4 justify-start">
+                  <div
+                    className="text-black px-2 py-1 font-bold text-lg flex flex-row justify-center gap-2 items-center border-2 border-black/40 rounded-md"
+                    style={{
+                      minWidth: "120px",
+                      backgroundColor: driverColor + "28",
+                    }}
+                  >
+                    <h6 className=" flex-1 text-center">
+                      {radioExchange.driver?.driverNumber}
+                    </h6>
+                    <div className="flex-1 flex justify-center">
+                      <canvas
+                        className="paralelogramo"
+                        style={{backgroundColor: driverColor}}
+                      />
+                    </div>
+                    <h6 className=" flex-1 min-w-10 text-center">
+                      {radioExchange.driver?.nameAcronym}
+                    </h6>
+                  </div>
+                  <AudioPlayer src={radioExchange.recordingUrl} />
+                </div>
+              </div>
+            );
+          })}
+      </SkeletonTable>
     </div>
   );
 };
