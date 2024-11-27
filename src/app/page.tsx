@@ -1,5 +1,10 @@
-"use client";
+import Leaderboard from "@components/Leaderboard";
 
 export default function Home() {
-  return <div></div>;
+  return (
+    <div>
+      F1 Dashboard Colapinto
+      <Leaderboard />
+    </div>
+  );
 }
