@@ -23,7 +23,7 @@ export default function Leaderboard() {
   ];
 
   return (
-    <div className="max-w-[1100px]">
+    <div className="max-w-[1100px] font-formula">
       <div className="flex flex-col gap-4 text-white bg-f1-black-200 mx-auto p-1 rounded-xl">
         <div className="flex flex-col gap-1 bg-f1-black-300 rounded-lg border-2 border-f1-gray-300/50">
           <div className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
@@ -41,12 +41,12 @@ export default function Leaderboard() {
               {/* TODO Pasar GP dinamico */}
               <p className="text-xl">Grand Prix Las Vegas</p>
               {/* TODO Pasar vueltas dinamicas */}
-              <p className="text-xl">8/50</p>
+              <p className="text-xl">Vuelta 8 / 50</p>
             </div>
           </div>
           <div className="overflow-x-auto">
             <div className="min-w-[900px]">
-              <div className="grid grid-cols-8 gap-4 px-2 py-2 whitespace-nowrap border-y border-f1-gray-300 bg-gradient-to-t from-f1-gray-400 to-f1-black-400 text-center text-sm font-semibold">
+              <div className="grid grid-cols-8 gap-4 px-2 py-2 whitespace-nowrap border-y border-f1-gray-300 bg-gradient-to-t from-f1-gray-400 to-f1-black-400 text-center text-sm">
                 <div>POS</div>
                 <div>Conductor</div>
                 <div>Tiempo de vuelta</div>
@@ -60,12 +60,12 @@ export default function Leaderboard() {
                 {lap8.map((lap, index) => (
                   <div
                     key={lap.driver_number}
-                    className="grid grid-cols-8 gap-4 items-center font-semibold text-sm last:border-b-0"
+                    className="grid grid-cols-8 gap-4 items-center text-sm last:border-b-0"
                   >
                     <div className="text-center border-r border-f1-gray-300/20 py-2">
                       {index + 1}
                     </div>
-                    <div className="text-center flex flex-row gap-2">
+                    <div className="text-center flex flex-row gap-2 justify-center">
                       {/* TODO Pasar Logo dinamico */}
                       <img
                         src="/images/svg/manufacturers/mercedes.svg"
