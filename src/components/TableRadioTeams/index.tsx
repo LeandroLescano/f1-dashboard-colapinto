@@ -8,15 +8,9 @@ import {getRadioExchanges} from "@services/teamRadio";
 import {getDrivers} from "@services/drivers";
 import {Driver} from "@services/drivers/types";
 
-import {TableRadioTeamsProps} from "./types";
+import {TableRadioTeamsProps, TeamRadioExtend} from "./types";
 import AudioPlayer from "./components/AudioPlayer";
 import SkeletonTable from "./components/SkeletonTable";
-
-
-
-interface TeamRadioExtend extends TeamRadio {
-  driver?: Driver;
-}
 
 /**
  * @param {number | "latest"} sessionKey ID of the Session
@@ -36,7 +30,7 @@ const TableRadioTeams = ({
     await getRadioExchanges(sessionKey).then((radios) => {
       radiosExchangeAux = radios;
     });
-    
+
     await getDrivers(sessionKey)
       .then((drivers) => {
         driversAux = drivers;
