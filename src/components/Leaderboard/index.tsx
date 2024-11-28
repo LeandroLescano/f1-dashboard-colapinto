@@ -1,3 +1,6 @@
+import moment from "moment";
+import clsx from "clsx";
+
 import {LeaderboardData} from "@interfaces/Leaderboard";
 
 import SegmentDisplay from "./components/Segments";
@@ -8,7 +11,7 @@ export default function Leaderboard({
   leaderboard: LeaderboardData;
 }) {
   return (
-    <div className="max-w-[1100px] font-formula">
+    <div className="max-w-[1150px] font-formula">
       <div className="flex flex-col gap-4 text-white bg-f1-black-200 mx-auto p-1 rounded-xl">
         <div className="flex flex-col gap-1 bg-f1-black-300 rounded-lg border-2 border-f1-gray-300/50">
           <div className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
@@ -19,14 +22,11 @@ export default function Leaderboard({
                 height={100}
                 alt="F1 logo"
               />
-              {/* Pasar tipo de Session dinamica */}
-              <p className="text-4xl font-bold">RACE</p>
+              <p className="text-4xl font-bold">{leaderboard.sessionName}</p>
             </div>
             <div className="flex flex-row gap-4">
-              {/* TODO Pasar GP dinamico */}
-              <p className="text-xl">Grand Prix Las Vegas</p>
-              {/* TODO Pasar vueltas dinamicas */}
-              <p className="text-xl">Vuelta 8 / 50</p>
+              <p className="text-2xl">{leaderboard.meetingName}</p>
+              <p className="text-2xl">Vuelta {leaderboard.currentLap}</p>
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -39,33 +39,39 @@ export default function Leaderboard({
                 <div>Sector 2</div>
                 <div>Sector 3</div>
                 <div>Velocidad punta</div>
-                <div>Pit Stops</div>
+                <div>Compound / Pit</div>
               </div>
               <div className="flex flex-col">
                 {leaderboard.drivers.map((driver, index) => (
                   <div
                     key={driver.driverNumber}
-                    className="grid grid-cols-8 gap-4 items-center font-semibold text-sm last:border-b-0"
+                    className="grid grid-cols-8 gap-4 items-center text-sm last:border-b-0"
                   >
-                    <div className="text-center border-r border-f1-gray-300/20 py-2">
+                    <div className="text-center border-r border-f1-gray-300/20 py-3">
                       {index + 1}
                     </div>
-                    <div className="text-center flex flex-row gap-2 justify-center">
+                    <div
+                      className="text-center flex flex-row gap-4
+                    justify-between w-16 place-self-center"
+                    >
                       <img
                         src={
                           driver.logo
                             ? `/images/svg/manufacturers/${driver.logo}.svg`
                             : "/images/svg/f1.svg"
                         }
-                        width={20}
-                        height={20}
+                        width={25}
+                        height={25}
                         alt="F1 logo"
                       />
                       <p>{driver.nameAcronym}</p>
                     </div>
                     <div className="text-center">
-                      {driver.lapDuration ? driver.lapDuration.toFixed(3) : "0"}
-                      s
+                      {driver.lapDuration
+                        ? moment
+                            .utc(driver.lapDuration * 1000)
+                            .format("m:ss.SSS")
+                        : "0:00.000"}
                     </div>
                     <SegmentDisplay
                       segments={driver.segmentsSector1}
@@ -80,11 +86,35 @@ export default function Leaderboard({
                       duration={driver.durationSector3}
                     />
                     <div className="text-center">{driver.stSpeed} km/h</div>
-                    {/* TODO Pasar cantidad de pit stops */}
-                    <div className="text-center">
-                      {driver.isPitOutLap ? "Yes" : "No"}
+                    <div className="justify-center flex flex-row gap-1">
+                      <div className="flex flex-row gap-2">
+                        <p
+                          className={clsx("", {
+                            "text-red-500":
+                              driver.stints[0].compound === "SOFT",
+                            "text-yellow-400":
+                              driver.stints[0].compound === "MEDIUM",
+                            "text-white": driver.stints[0].compound === "HARD",
+                            "text-green-600":
+                              driver.stints[0].compound === "INTERMEDIATE",
+                            "text-blue-600":
+                              driver.stints[0].compound === "WET",
+                          })}
+                        >
+                          {driver.stints[0].compound.charAt(0)}
+                        </p>
+                        <p> -</p>
+                        <p className="self-center">
+                          {leaderboard.currentLap
+                            ? leaderboard.currentLap - driver.stints[0].lapStart
+                            : "0"}
+                        </p>
+                      </div>
+                      <p className="text-f1-gray-300">|</p>
+                      <p className="text-f1-gray-300">
+                        PIT {driver.stints.length - 1}
+                      </p>
                     </div>
-                    {/* TODO Faltan agregar ruedas y cantidad de vueltas con cada rueda */}
                   </div>
                 ))}
               </div>
