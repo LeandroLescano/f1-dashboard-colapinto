@@ -1,6 +1,6 @@
 import {CamelizeKeys} from "@interfaces/generic";
 
-export interface raceControlDTO {
+export interface RaceControlDTO {
   category: string;
   date: Date;
   driver_number: number;
@@ -21,4 +21,4 @@ export type Flag =
   | "CHEQUERED"
   | "RED";
 
-export type raceControl = CamelizeKeys<raceControlDTO>;
+export type RaceControl = CamelizeKeys<RaceControlDTO>;
