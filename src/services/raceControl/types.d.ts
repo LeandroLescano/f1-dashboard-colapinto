@@ -4,7 +4,7 @@ export interface RaceControlDTO {
   category: string;
   date: Date;
   driver_number: number;
-  flag: string;
+  flag: Flag;
   lap_number: number;
   meeting_key: number;
   message: string;
