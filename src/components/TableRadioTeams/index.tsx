@@ -22,7 +22,6 @@ interface TeamRadioExtend extends TeamRadio {
  * @param {number | "latest"} sessionKey ID of the Session
  * @param {number} maxHeight the number in pixels of height
  */
-
 const TableRadioTeams = ({
   sessionKey = "latest",
   maxHeight = 400,
