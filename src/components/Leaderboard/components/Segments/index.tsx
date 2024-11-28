@@ -11,7 +11,7 @@ export default function SegmentDisplay({
     <div className="text-center">
       <div className="flex flex-col">
         <div className="flex flex-row gap-1 justify-center">
-          {segments.map((segment, index) => (
+          {segments?.map((segment, index) => (
             <div
               key={`sector-${index}`}
               className={clsx(
@@ -24,7 +24,7 @@ export default function SegmentDisplay({
             />
           ))}
         </div>
-        <div>{duration.toFixed(3)}s</div>
+        <div>{duration?.toFixed(3)}s</div>
       </div>
     </div>
   );
