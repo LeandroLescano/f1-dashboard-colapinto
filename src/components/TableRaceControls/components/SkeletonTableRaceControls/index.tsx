@@ -2,7 +2,7 @@ import React from "react";
 import clsx from "clsx";
 
 import {Skeleton} from "@components/ui/skeleton";
-import SkeletonFlag from "@components/Flag/Skeleton";
+import SkeletonFlag from "@components/Flag/SkeletonFlag";
 
 import {SkeletonTableProps} from "./types";
 
