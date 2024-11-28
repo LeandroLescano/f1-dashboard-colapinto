@@ -11,6 +11,8 @@ interface LeaderboardDriver extends Driver, Lap {
   logo: string;
   currentLap: number;
   stints: Stint[];
+  position: number;
+  positionTrend: PositionTrend;
 }
 
 export interface CurrentRace {
@@ -21,3 +23,5 @@ export interface CurrentRace {
   currentLap?: number;
   currentFlag?: Flag;
 }
+
+export type PositionTrend = "UP" | "DOWN" | "SAME";

@@ -7,6 +7,7 @@ import {
   CurrentRace,
   LeaderboardData,
   LeaderboardDriver,
+  PositionTrend,
 } from "@interfaces/Leaderboard";
 import {getDrivers} from "@services/drivers";
 import {Driver} from "@services/drivers/types";
@@ -14,6 +15,8 @@ import {getLaps} from "@services/laps";
 import {getMeetings} from "@services/meetings";
 import {getSessions} from "@services/sessions";
 import {getStints} from "@services/stints";
+import {getPosition} from "@services/positions";
+import {getRaceControls} from "@services/raceControl";
 
 export default function Home() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>();
@@ -23,10 +26,13 @@ export default function Home() {
     sessionName: "",
     sessionDateStart: new Date(),
   });
+  const [ongoingLap, setOngoingLap] = useState(2); //TODO: testing
 
   const updateLeaderboard = async () => {
     let localDrivers = drivers;
     let localRace = currentRace;
+    const localOngoingLap = ongoingLap; //TODO: testing
+    setOngoingLap(localOngoingLap + 1); //TODO: testing
 
     if (localDrivers.length === 0) {
       localDrivers = await getDrivers("latest");
@@ -43,8 +49,12 @@ export default function Home() {
       setCurrentRace(localRace);
     }
 
-    const laps = await getLaps("latest");
-    const stints = await getStints("latest");
+    const laps = await getLaps("latest", undefined, ongoingLap);
+    const [stints, positions, raceControls] = await Promise.all([
+      getStints("latest", undefined, laps[0].lapNumber),
+      getPosition("latest", undefined, laps[0].dateStart),
+      getRaceControls("latest", laps[0].dateStart),
+    ]);
 
     const lastDriverData: LeaderboardDriver[] = [];
 
@@ -55,6 +65,16 @@ export default function Home() {
       const driverStints = stints.filter(
         (stint) => stint.driverNumber === driver.driverNumber
       );
+      const driverPositions = positions.filter(
+        (position) => position.driverNumber === driver.driverNumber
+      );
+      const currentPos = driverPositions[0]?.position ?? 0;
+      const prevPos =
+        leaderboardData?.drivers.find(
+          (d) => d.driverNumber === driver.driverNumber
+        )?.position ?? currentPos;
+      const posTrend: PositionTrend =
+        currentPos < prevPos ? "UP" : currentPos > prevPos ? "DOWN" : "SAME";
 
       if (lastLap) {
         const teamLogo = driver.teamName
@@ -68,20 +88,31 @@ export default function Home() {
           logo: teamLogo,
           currentLap: lastLap?.lapNumber || 0,
           stints: driverStints,
+          position: currentPos,
+          positionTrend: posTrend,
         });
       }
     }
 
+    lastDriverData.sort((a, b) => a.position - b.position);
+
     if (localRace) {
       setLeaderboardData({
         ...localRace,
+        currentLap: laps[0].lapNumber,
+        currentFlag: raceControls[0].flag,
         drivers: lastDriverData,
       });
     }
   };
 
   useEffect(() => {
+    // const intervalId = setInterval(() => {
     updateLeaderboard();
+    // }, 5000); // 5000ms = 5 seconds //TODO: testing
+
+    // // Cleanup the interval when the component unmounts
+    // return () => clearInterval(intervalId);
   }, []);
 
   return (

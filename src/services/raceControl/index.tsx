@@ -1,3 +1,5 @@
+import moment from "moment";
+
 import {f1Client} from "@services/axios";
 import {toCamel} from "@utils/object";
 
@@ -9,11 +11,13 @@ import {RaceControl, RaceControlDTO} from "./types";
  * @returns {RaceControl[]} array of raceControl
  */
 export const getRaceControls = async (
-  sessionKey?: number | "latest"
+  sessionKey?: number | "latest",
+  date?: Date
 ): Promise<RaceControl[]> => {
   const {data} = await f1Client.get<RaceControlDTO[]>("/race_control", {
     params: {
       session_key: sessionKey,
+      "date<": date && moment(date).add(1, "minute").toDate().toISOString(),
     },
   });
 
