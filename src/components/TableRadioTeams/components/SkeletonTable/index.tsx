@@ -1,7 +1,9 @@
 import React, {Children} from "react";
-import {Skeleton} from "@/components/ui/skeleton";
-import {SkeletonTableProps} from "./types";
 import clsx from "clsx";
+
+import {Skeleton} from "@/components/ui/skeleton";
+
+import {SkeletonTableProps} from "./types";
 
 const SkeletonTable = ({
   rowQuantity,
