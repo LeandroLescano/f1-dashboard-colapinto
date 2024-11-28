@@ -20,5 +20,5 @@ export const getStints = async (
     },
   });
 
-  return toCamel(data) as Stint[];
+  return toCamel(data.reverse()) as Stint[];
 };

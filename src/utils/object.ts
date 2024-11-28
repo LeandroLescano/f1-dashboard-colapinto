@@ -16,7 +16,7 @@ export const toCamel = <T>(item: T): CamelizeKeys<T> => {
       .map(([key, value]: [string, unknown]) => [
         key
           .replace(/(_id)/g, "ID") // Replace id with ID only if is not the first word
-          .replace(/([-_][a-z])/gi, (c) =>
+          .replace(/([-_](\d|[a-z]))/gi, (c) =>
             c.toUpperCase().replace(/[-_]/g, "")
           ), // Convert snake_case to camelCase
         toCamel(value),
