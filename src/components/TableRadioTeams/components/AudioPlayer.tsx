@@ -3,8 +3,8 @@ import React, {useRef, useState} from "react";
 
 const AudioPlayer = ({src}: {src: string}) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [progress, setProgress] = useState(0); // Estado para la posición de la barra de progreso
-  const [duration, setDuration] = useState(0); // Duración total del audio
+  const [progress, setProgress] = useState(0); // progress bar position
+  const [duration, setDuration] = useState(0); // duration of audio
 
   const handlePlayPause = () => {
     if (audioRef.current) {
@@ -26,7 +26,7 @@ const AudioPlayer = ({src}: {src: string}) => {
 
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
-      setDuration(audioRef.current.duration); // Guardar la duración del audio al cargar
+      setDuration(audioRef.current.duration); // save duration audio when loading
     }
   };
 
