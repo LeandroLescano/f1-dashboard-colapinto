@@ -1,4 +1,4 @@
-import React, {Children} from "react";
+import React from "react";
 import clsx from "clsx";
 
 import {Skeleton} from "@/components/ui/skeleton";
