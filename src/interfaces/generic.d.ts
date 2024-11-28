@@ -10,7 +10,9 @@ export type Camelize<S extends string> = S extends `id_${infer Rest}`
   : S; // Otherwise return the string as is
 
 // CamelizeKeys converts a snake_case object to camelCase
-export type CamelizeKeys<T> = T extends object
+export type CamelizeKeys<T> = T extends Date
+  ? T // Preserve Date type
+  : T extends object
   ? {
       // For each key in T, convert it to camelCase
       [K in keyof T as Camelize<string & K>]: T[K] extends (infer U)[]
