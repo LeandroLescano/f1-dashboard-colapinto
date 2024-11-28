@@ -1,5 +1,7 @@
 import React from "react";
+
 import {FlagProps} from "./types";
+
 const flags = {
   GREEN: "/images/svg/flags/green-flag.svg",
   CLEAR: "/images/svg/flags/green-flag.svg",
@@ -10,7 +12,9 @@ const flags = {
   RED: "/images/svg/flags/red-flag.svg",
 };
 const Flag = ({type, width = 20, height = 20}: FlagProps) => {
-  return <img src={flags[type]} style={{width: width, height: height}} />;
+  return (
+    <img alt={type} src={flags[type]} style={{width: width, height: height}} />
+  );
 };
 
 export default Flag;
