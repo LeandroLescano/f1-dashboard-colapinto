@@ -20,5 +20,5 @@ export const getRadioExchanges = async (
     },
   });
 
-  return toCamel(data) as TeamRadio[];
+  return toCamel(data.reverse()) as TeamRadio[];
 };

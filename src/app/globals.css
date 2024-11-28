@@ -70,3 +70,42 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .paralelogramo {
+    width: 11px;
+    height: 20px;
+    -webkit-transform: skew(-20deg);
+    -moz-transform: skew(-20deg);
+    -o-transform: skew(-20deg);
+  }
+  .drag_input {
+    -webkit-appearance: none; /* Deshabilita la apariencia predeterminada */
+    appearance: none; /* Para navegadores modernos */
+    width: 100%; /* Asegúrate de que el slider tenga un tamaño visible */
+    height: 6px;
+    background: #ddd; /* Fondo del track del slider */
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .drag_input::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Elimina el estilo predeterminado en Chrome/Opera */
+    appearance: none; /* Compatibilidad con otros navegadores */
+    width: 14px;
+    height: 14px;
+    background-color: #363636; /* Color del thumb */
+    border-radius: 50%;
+    cursor: grab;
+    border: none; /* Asegura que no haya borde */
+  }
+
+  .drag_input::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background-color: #363636; /* Color del thumb en Firefox */
+    border-radius: 50%;
+    cursor: grab;
+    border: none;
+  }
+}
