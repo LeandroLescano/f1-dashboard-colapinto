@@ -36,7 +36,7 @@ const TableRadioTeams = ({
     await getRadioExchanges(sessionKey).then((radios) => {
       radiosExchangeAux = radios;
     });
-    console.log({radiosExchangeAux});
+    
     await getDrivers(sessionKey)
       .then((drivers) => {
         driversAux = drivers;
