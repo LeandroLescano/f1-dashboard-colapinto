@@ -23,6 +23,7 @@ import {DriverData} from "@components/DriverData";
 import TableRadioTeams from "@components/TableRadioTeams";
 import TableRaceControls from "@components/TableRaceControls";
 import {RaceControl} from "@services/raceControl/types";
+import SkeletonLeaderboard from "@components/Leaderboard/components/SkeletonLeaderboard";
 
 export default function Home() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>();
@@ -142,13 +143,29 @@ export default function Home() {
       >
         Update
       </button>
-      {leaderboardData && (
-        <Leaderboard
-          leaderboard={leaderboardData}
-          driverSelected={selectedDriver}
-          onChangeDriverSelected={setSelectedDriver}
-        />
-      )}
+      <button
+        onClick={() => {
+          if (leaderboardData) {
+            setLeaderboardData(undefined);
+          } else updateLeaderboard();
+        }}
+        className="bg-blue-400 p-3 rounded-lg absolute left-32"
+      >
+        loading
+      </button>
+
+      <SkeletonLeaderboard isLoading={leaderboardData === undefined}>
+        {leaderboardData ? (
+          <Leaderboard
+            leaderboard={leaderboardData}
+            driverSelected={selectedDriver}
+            onChangeDriverSelected={setSelectedDriver}
+          />
+        ) : (
+          <></>
+        )}
+      </SkeletonLeaderboard>
+
       <div className="flex flex-col flex-1 min-h-0 h-auto lg:h-dvh">
         <DriverData
           driver={leaderboardData?.drivers.find(
