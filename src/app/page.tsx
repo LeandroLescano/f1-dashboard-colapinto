@@ -157,7 +157,7 @@ export default function Home() {
         />
         <div className="flex flex-row flex-1 min-h-0 h-auto lg:h-100 flex-wrap lg:flex-nowrap">
           <TableRaceControls
-            raceControls={raceControls ?? []}
+            raceControls={raceControls}
             isLoading={!raceControls}
             className="w-full h-72 lg:h-full"
           />
