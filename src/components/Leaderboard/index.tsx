@@ -7,6 +7,7 @@ import {LeaderboardData} from "@interfaces/Leaderboard";
 import {Trend} from "@components/Trend";
 
 import SegmentDisplay from "./components/Segments";
+import CompoundPit from "./components/CompoundPit";
 
 export default function Leaderboard({
   leaderboard,
@@ -42,21 +43,21 @@ export default function Leaderboard({
           </div>
           <div className="overflow-x-auto">
             <div className="min-w-[900px]">
-              <div className="grid grid-cols-8 gap-4 px-2 py-2 whitespace-nowrap border-y border-f1-gray-300 bg-gradient-to-t from-f1-gray-400 to-f1-black-400 text-center text-sm">
-                <div>POS</div>
-                <div>Conductor</div>
-                <div>Tiempo de vuelta</div>
-                <div>Sector 1</div>
-                <div>Sector 2</div>
-                <div>Sector 3</div>
-                <div>Velocidad punta</div>
-                <div>Compound / Pit</div>
+              <div className="grid grid-cols-[100px,1fr,1fr,1fr,1fr,1fr,1fr,1fr] gap-4 pr-2 py-2 whitespace-nowrap border-y border-f1-gray-300 bg-gradient-to-t from-f1-gray-400 to-f1-black-400 text-center text-sm">
+                <h5 className="text-center">POS</h5>
+                <h5 className="text-center">Conductor</h5>
+                <h5 className="text-center">Tiempo de vuelta</h5>
+                <h5 className="text-center">Sector 1</h5>
+                <h5 className="text-center">Sector 2</h5>
+                <h5 className="text-center">Sector 3</h5>
+                <h5 className="text-center">Velocidad punta</h5>
+                <h5 className="text-center">Compound / Pit</h5>
               </div>
               <div className="flex flex-col" ref={parent}>
                 {leaderboard.drivers.map((driver, index) => (
                   <div
                     key={driver.driverNumber}
-                    className="grid grid-cols-8 gap-4 items-center text-sm last:border-b-0"
+                    className="grid grid-cols-[100px,1fr,1fr,1fr,1fr,1fr,1fr,1fr] gap-4 items-center text-sm last:border-b-0"
                   >
                     <div className="text-center border-r border-f1-gray-300/20 py-3">
                       {index + 1}
@@ -100,35 +101,8 @@ export default function Leaderboard({
                       duration={driver.durationSector3}
                     />
                     <div className="text-center">{driver.stSpeed} km/h</div>
-                    <div className="justify-center flex flex-row gap-1">
-                      <div className="flex flex-row gap-2">
-                        <p
-                          className={clsx("", {
-                            "text-red-500":
-                              driver.stints[0].compound === "SOFT",
-                            "text-yellow-400":
-                              driver.stints[0].compound === "MEDIUM",
-                            "text-white": driver.stints[0].compound === "HARD",
-                            "text-green-600":
-                              driver.stints[0].compound === "INTERMEDIATE",
-                            "text-blue-600":
-                              driver.stints[0].compound === "WET",
-                          })}
-                        >
-                          {driver.stints[0].compound.charAt(0)}
-                        </p>
-                        <p> -</p>
-                        <p className="self-center">
-                          {leaderboard.currentLap
-                            ? leaderboard.currentLap - driver.stints[0].lapStart
-                            : "0"}
-                        </p>
-                      </div>
-                      <p className="text-f1-gray-300">|</p>
-                      <p className="text-f1-gray-300">
-                        PIT {driver.stints.length - 1}
-                      </p>
-                    </div>
+
+                    <CompoundPit leaderboard={leaderboard} driver={driver} />
                   </div>
                 ))}
               </div>
