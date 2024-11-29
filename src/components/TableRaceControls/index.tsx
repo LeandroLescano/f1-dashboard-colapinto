@@ -14,7 +14,7 @@ const TableRaceControls = ({
 }: TableRaceControlsProps) => {
   return (
     <SkeletonTable isLoading={isLoading} rowNumber={20} className={className}>
-      <div className={clsx("w-fit overflow-y-scroll", className)}>
+      <div className={clsx("w-fit overflow-y-auto", className)}>
         {raceControls.map((raceControl, i) => {
           return (
             <div className="bg-f1-black-400 p-2 flex flex-col gap-1" key={i}>

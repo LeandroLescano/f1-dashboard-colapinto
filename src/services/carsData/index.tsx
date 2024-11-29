@@ -31,7 +31,7 @@ export const getCarsData = async (
     params: {
       session_key: sessionKey,
       driver_number: driverNumber,
-      "date>": date,
+      "date<": date,
     },
   });
 

@@ -3,9 +3,9 @@ import clsx from "clsx";
 
 import {CompoundPitProps} from "./types";
 
-const CompoundPit = ({driver, leaderboard}: CompoundPitProps) => {
+const CompoundPit = ({driver, className}: CompoundPitProps) => {
   return (
-    <div className="flex flex-row gap-1 justify-around">
+    <div className={clsx("flex flex-row gap-1 justify-around", className)}>
       <div className="flex flex-row justify-start">
         <p
           className={clsx("w-5 text-center", {
@@ -19,14 +19,16 @@ const CompoundPit = ({driver, leaderboard}: CompoundPitProps) => {
           {driver.stints[0].compound.charAt(0)}
         </p>
         <p className="pl-1">-</p>
-        <p className="text-center w-7 ">
-          {leaderboard.currentLap
-            ? leaderboard.currentLap - driver.stints[0].lapStart
+        <p className="text-center w-7">
+          {driver.currentLap
+            ? driver.currentLap - driver.stints[0].lapStart
             : "0"}
         </p>
       </div>
-      <p className="text-gray-500">|</p>
-      <p className="text-gray-500">PIT {driver.stints.length - 1}</p>
+      <p className={className ? "" : "text-gray-500"}>|</p>
+      <p className={className ? "" : "text-gray-500"}>
+        PIT {driver.stints.length - 1}
+      </p>
     </div>
   );
 };

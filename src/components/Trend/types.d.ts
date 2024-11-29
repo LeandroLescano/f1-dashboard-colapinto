@@ -1,4 +1,4 @@
-import {PositionTrend} from "@interfaces/Leaderboard";
+import {PositionTrend} from "@interfaces/Dashboard";
 
 export interface TrendProps {
   direction: PositionTrend;

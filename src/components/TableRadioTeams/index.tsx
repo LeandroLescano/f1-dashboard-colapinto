@@ -14,11 +14,11 @@ import SkeletonTable from "./components/SkeletonTable";
 
 /**
  * @param {number | "latest"} sessionKey ID of the Session
- * @param {number} maxHeight the number in pixels of height
+ * @param {string} className additional classes
  */
 const TableRadioTeams = ({
   sessionKey = "latest",
-  maxHeight = 400,
+  className,
 }: TableRadioTeamsProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [radioExchanges, setRadioExchanges] = useState<TeamRadioExtend[]>([]);
@@ -58,8 +58,10 @@ const TableRadioTeams = ({
 
   return (
     <div
-      className="flex flex-col gap-2 pt-2 px-2 w-fit overflow-y-scroll"
-      style={{maxHeight: `${maxHeight}px`}}
+      className={clsx(
+        "flex flex-col gap-2 pt-2 px-2 w-fit overflow-y-auto",
+        className
+      )}
     >
       <SkeletonTable rowQuantity={10} isLoading={isLoading}>
         {radioExchanges &&
@@ -73,7 +75,7 @@ const TableRadioTeams = ({
             return (
               <div
                 key={i}
-                className={clsx("flex flex-col pb-4 w-fit", {
+                className={clsx("flex flex-col pb-4 w-full", {
                   "border-b-2 border-gray-500/50":
                     i !== radioExchanges.length - 1,
                 })}
@@ -83,7 +85,7 @@ const TableRadioTeams = ({
                 </p>
                 <div className="flex flex-row gap-4 justify-start">
                   <div
-                    className="text-black px-2 py-1 font-bold text-lg flex flex-row justify-center gap-2 items-center border-2 border-black/40 rounded-md"
+                    className="text-white px-2 py-1 font-bold text-lg flex flex-row justify-center gap-2 items-center border-2 border-black/40 rounded-md"
                     style={{
                       minWidth: "120px",
                       backgroundColor: driverColor + "28",

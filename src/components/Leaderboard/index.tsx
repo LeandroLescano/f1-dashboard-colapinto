@@ -23,7 +23,7 @@ export default function Leaderboard({
   }, []);
 
   return (
-    <div className="max-w-[1250px] font-formula">
+    <div className="max-w-full font-formula lg:max-w-[1250px]">
       <div className="flex flex-col gap-4 text-white bg-f1-black-200 mx-auto p-1 rounded-xl">
         <div className="flex flex-col gap-1 bg-f1-black-300 rounded-lg border-2 border-f1-gray-300/50">
           <div className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
@@ -48,9 +48,9 @@ export default function Leaderboard({
                 <h5 className="text-center">Conductor</h5>
                 <h5 className="text-center">Tiempo de vuelta</h5>
                 <h5 className="text-center">Velocidad punta</h5>
+                <h5 className="text-center">Sector 1</h5>
                 <h5 className="text-center">Sector 2</h5>
                 <h5 className="text-center">Sector 3</h5>
-                <h5 className="text-center">Sector 1</h5>
                 <h5 className="text-center">Compound / Pit</h5>
               </div>
               <div className="flex flex-col" ref={parent}>
@@ -128,7 +128,7 @@ export default function Leaderboard({
                         duration={driver.durationSector3}
                       />
 
-                      <CompoundPit leaderboard={leaderboard} driver={driver} />
+                      <CompoundPit driver={driver} />
                     </div>
                   );
                 })}

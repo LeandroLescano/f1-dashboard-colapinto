@@ -1,6 +1,6 @@
-import {LeaderboardData, LeaderboardDriver} from "@interfaces/Leaderboard";
+import {LeaderboardDriver} from "@interfaces/Leaderboard";
 
 export interface CompoundPitProps {
   driver: LeaderboardDriver;
-  leaderboard: LeaderboardData;
+  className?: string;
 }
