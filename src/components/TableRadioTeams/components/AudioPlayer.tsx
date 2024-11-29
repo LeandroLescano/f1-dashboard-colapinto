@@ -49,9 +49,9 @@ const AudioPlayer = ({src}: {src: string}) => {
 
       <button onClick={handlePlayPause}>
         {audioRef.current?.paused ? (
-          <PlayCircleIcon size={30} />
+          <PlayCircleIcon color="white" size={30} />
         ) : (
-          <PauseCircleIcon size={30} />
+          <PauseCircleIcon color="white" size={30} />
         )}
       </button>
       <input

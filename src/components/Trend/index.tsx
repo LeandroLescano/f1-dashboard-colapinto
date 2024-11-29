@@ -11,6 +11,7 @@ export const Trend = ({direction: positionTrend}: TrendProps) => {
         xmlns="http://www.w3.org/2000/svg"
         className="fill-gray-600"
         width={25}
+        height={25}
       >
         <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
         <g
@@ -34,11 +35,11 @@ export const Trend = ({direction: positionTrend}: TrendProps) => {
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
       enableBackground="new 0 0 32 32"
-      height="32px"
       id="Layer_1"
       version="1.1"
       viewBox="0 0 32 32"
       width={25}
+      height={25}
       className={clsx("fill-green-400", {
         "fill-red-400 rotate-180": positionTrend === "DOWN",
       })}
