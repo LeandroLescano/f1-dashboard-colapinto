@@ -118,6 +118,14 @@ export default function Home() {
   return (
     <div>
       F1 Dashboard Colapinto
+      <button
+        onClick={() => {
+          updateLeaderboard();
+        }}
+        className="bg-red-400 p-3 rounded-lg"
+      >
+        Update
+      </button>
       {leaderboardData && <Leaderboard leaderboard={leaderboardData} />}
     </div>
   );
