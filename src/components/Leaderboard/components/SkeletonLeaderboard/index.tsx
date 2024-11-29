@@ -10,7 +10,7 @@ const SkeletonDisplaySegment = ({
   segmentQuantity: number;
 }) => {
   return (
-    <div className={"flex flex-col text-center gap-1"}>
+    <div className="flex flex-col text-center gap-1">
       <div className="flex flex-row gap-1 justify-center ">
         {[...Array(segmentQuantity)].map((_, index) => (
           <Skeleton
