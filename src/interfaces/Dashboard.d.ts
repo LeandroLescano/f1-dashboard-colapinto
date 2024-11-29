@@ -1,4 +1,3 @@
-import {CarData} from "@services/carsData/types";
 import {Driver} from "@services/drivers/types";
 import {Lap} from "@services/laps/types";
 import {Flag} from "@services/raceControl/types";
