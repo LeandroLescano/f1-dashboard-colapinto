@@ -1,7 +1,10 @@
+import {useEffect} from "react";
 import moment from "moment";
 import clsx from "clsx";
+import {useAutoAnimate} from "@formkit/auto-animate/react";
 
 import {LeaderboardData} from "@interfaces/Leaderboard";
+import {Trend} from "@components/Trend";
 
 import SegmentDisplay from "./components/Segments";
 
@@ -10,6 +13,14 @@ export default function Leaderboard({
 }: {
   leaderboard: LeaderboardData;
 }) {
+  const [parent, enableAnimations] = useAutoAnimate({
+    duration: 750,
+  });
+
+  useEffect(() => {
+    enableAnimations(true);
+  }, []);
+
   return (
     <div className="max-w-[1150px] font-formula">
       <div className="flex flex-col gap-4 text-white bg-f1-black-200 mx-auto p-1 rounded-xl">
@@ -41,7 +52,7 @@ export default function Leaderboard({
                 <div>Velocidad punta</div>
                 <div>Compound / Pit</div>
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col" ref={parent}>
                 {leaderboard.drivers.map((driver, index) => (
                   <div
                     key={driver.driverNumber}
@@ -51,9 +62,10 @@ export default function Leaderboard({
                       {index + 1}
                     </div>
                     <div
-                      className="text-center flex flex-row gap-4
-                    justify-between w-16 place-self-center"
+                      className="text-center flex flex-row
+                    justify-around w-full place-self-center items-center"
                     >
+                      <Trend direction={driver.positionTrend} />
                       <img
                         src={
                           driver.logo
@@ -64,7 +76,9 @@ export default function Leaderboard({
                         height={25}
                         alt="F1 logo"
                       />
-                      <p>{driver.nameAcronym}</p>
+                      <p className="min-w-11 text-center">
+                        {driver.nameAcronym}
+                      </p>
                     </div>
                     <div className="text-center">
                       {driver.lapDuration

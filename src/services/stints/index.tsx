@@ -11,12 +11,14 @@ import {Stint, StintDTO} from "./types";
  */
 export const getStints = async (
   sessionKey?: number | "latest",
-  driverNumber?: number
+  driverNumber?: number,
+  lapStart?: number
 ): Promise<Stint[]> => {
   const {data} = await f1Client.get<StintDTO[]>("/stints", {
     params: {
       session_key: sessionKey,
       driver_number: driverNumber,
+      "lap_start<": lapStart,
     },
   });
 

@@ -12,13 +12,13 @@ import {Lap, LapDTO} from "./types";
 export const getLaps = async (
   sessionKey?: number | "latest",
   driverNumber?: number,
-  startDate?: Date
+  lapNumber?: number
 ): Promise<Lap[]> => {
   const {data} = await f1Client.get<LapDTO[]>("/laps", {
     params: {
       session_key: sessionKey,
       driver_number: driverNumber,
-      "date_start>": startDate?.toISOString(),
+      "lap_number<": lapNumber,
     },
   });
 
