@@ -4,7 +4,7 @@ import {Flag} from "@services/raceControl/types";
 import {Stint} from "@services/stints/types";
 
 export interface LeaderboardProps {
-  onChangeDriverSelected: (driverNumber: number) => void;
+  onChangeDriverSelected?: (driverNumber: number) => void;
   leaderboard: LeaderboardData;
 }
 

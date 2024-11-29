@@ -80,7 +80,7 @@ export default function Leaderboard({
                       }}
                       onClick={() => {
                         setDriverSelected(driver.driverNumber);
-                        onChangeDriverSelected(driver.driverNumber);
+                        onChangeDriverSelected?.(driver.driverNumber);
                       }}
                     >
                       <div className="text-center border-r border-f1-gray-300/20 py-3">
