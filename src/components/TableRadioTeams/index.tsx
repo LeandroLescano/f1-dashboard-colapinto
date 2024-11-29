@@ -53,11 +53,15 @@ const TableRadioTeams = ({
   };
 
   useEffect(() => {
-    const intervalId = setInterval(async () => {
-      handlerFetchData();
-    }, 20000); // 20000ms = 20 seconds
+    let intervalId: NodeJS.Timeout;
 
-    // Cleanup the interval when the component unmounts
+    handlerFetchData().then(() => {
+      intervalId = setInterval(async () => {
+        handlerFetchData();
+      }, 20000); // 20000ms = 20 seconds
+
+      // Cleanup the interval when the component unmounts
+    });
     return () => clearInterval(intervalId);
   }, []);
 

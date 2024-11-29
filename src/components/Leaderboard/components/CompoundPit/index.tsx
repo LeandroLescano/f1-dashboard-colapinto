@@ -16,7 +16,7 @@ const CompoundPit = ({driver, className}: CompoundPitProps) => {
             "text-blue-600": driver.stints[0].compound === "WET",
           })}
         >
-          {driver.stints[0].compound.charAt(0)}
+          {driver.stints[0].compound?.charAt(0)}
         </p>
         <p className="pl-1">-</p>
         <p className="text-center w-7">

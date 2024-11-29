@@ -26,6 +26,8 @@ import TableRadioTeams from "@components/TableRadioTeams";
 import {RaceControl} from "@services/raceControl/types";
 import SkeletonLeaderboard from "@components/Leaderboard/components/SkeletonLeaderboard";
 import SkeletonDriverData from "@components/DriverData/SkeletonDriverData";
+import {Lap} from "@services/laps/types";
+
 const TableRaceControls = dynamic(
   () => import("../components/TableRaceControls"),
   {ssr: false}
@@ -33,7 +35,6 @@ const TableRaceControls = dynamic(
 
 export default function Home() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>();
-  const [drivers, setDrivers] = useState<Driver[]>([]);
   const [selectedDriver, setSelectedDriver] = useState(43);
   const [raceControls, setRaceControls] = useState<RaceControl[]>([]);
   const [currentRace, setCurrentRace] = useState<CurrentRace>({
@@ -45,9 +46,10 @@ export default function Home() {
   const [fetchingData, setFetchingData] = useState(false);
   const leaderboardDataRef = useRef<LeaderboardData>();
   const driversRef = useRef<Driver[]>([]);
+  const lapsRef = useRef<Lap[]>([]);
 
   const updateLeaderboard = async () => {
-    let localDrivers = drivers;
+    let localDrivers = driversRef.current;
     let localRace = currentRace;
     // const localOngoingLap = ongoingLap; //TODO: testing
     // setOngoingLap(localOngoingLap + 1); //TODO: testing
@@ -55,17 +57,19 @@ export default function Home() {
     if (driversRef.current?.length === 0) {
       localDrivers = await getDrivers("latest");
       driversRef.current = localDrivers;
-      setDrivers(localDrivers);
     }
     let ongoingRace = false;
+    let meeting;
+    let session;
     if (!localRace.meetingName || !localRace.sessionName) {
-      const meeting = await getMeetings("latest");
-      const session = await getSessions("latest");
+      meeting = await getMeetings("latest");
+      session = await getSessions("latest");
       localRace = {
         meetingName: meeting[0].meetingName,
         sessionName: session[0].sessionName,
         sessionDateStart: session[0].dateStart as Date,
       };
+
       setCurrentRace(localRace);
       if (
         moment().isAfter(session[0].dateStart) &&
@@ -82,14 +86,19 @@ export default function Home() {
     }
     if (!ongoingRace && leaderboardDataRef.current?.drivers) return; // No current race
 
+    const fromLap =
+      lapsRef.current.length === 0 ? 0 : leaderboardDataRef.current?.currentLap;
+
     const [laps, stints, positions, raceControlsData, carsData] =
       await Promise.all([
-        getLaps("latest", undefined, leaderboardDataRef.current?.currentLap),
+        getLaps("latest", undefined, fromLap),
         getStints("latest", undefined),
         getPosition("latest", undefined, new Date()),
         getRaceControls("latest"),
         getCarsData("latest", undefined, new Date()),
       ]);
+
+    lapsRef.current = [...laps, ...lapsRef.current];
 
     const lastDriverData: LeaderboardDriver[] = [];
 
@@ -101,9 +110,11 @@ export default function Home() {
         };
       }
 
-      const lastLap = laps.find(
+      const driverLaps = lapsRef.current.filter(
         (lap) => lap.driverNumber === driver.driverNumber
       );
+
+      const lastLap = driverLaps[0];
       const carData = carsData.find(
         (car) => car.driverNumber === driver.driverNumber
       );
@@ -121,28 +132,52 @@ export default function Home() {
       const posTrend: PositionTrend =
         currentPos < prevPos ? "UP" : currentPos > prevPos ? "DOWN" : "SAME";
 
-      if (lastLap && carData) {
-        const teamLogo = driver.teamName?.replaceAll(" ", "").toLowerCase();
-        lastDriverData.push({
-          ...driver,
-          ...lastLap,
-          ...carData,
-          logo: teamLogo,
-          currentLap: lastLap?.lapNumber || 0,
-          stints: driverStints,
-          position: currentPos,
-          positionTrend: posTrend,
-        });
-      }
+      // if (lastLap && carData) {
+      const teamLogo = driver.teamName?.replaceAll(" ", "").toLowerCase();
+      console.log({driverLaps});
+      let driverLapDuration =
+        session?.[0].sessionType === "RACE"
+          ? lastLap?.lapDuration
+          : Math.min(
+              ...driverLaps
+                .filter((d) => d.lapDuration && d.lapDuration > 0)
+                .map((lap) => lap.lapDuration)
+            );
+
+      if (!isFinite(driverLapDuration)) driverLapDuration = 0;
+
+      lastDriverData.push({
+        ...driver,
+        ...lastLap,
+        ...carData,
+        lapDuration: driverLapDuration,
+        logo: teamLogo,
+        currentLap: lastLap?.lapNumber || 0,
+        stints: driverStints,
+        position: currentPos,
+        positionTrend: posTrend,
+      });
+      // }
     }
 
-    lastDriverData.sort((a, b) => a.position - b.position);
+    if (session?.[0].sessionType === "RACE") {
+      lastDriverData.sort((a, b) => a.position - b.position);
+    } else {
+      lastDriverData
+        .sort((a, b) => (a.lapDuration || 30000) - (b.lapDuration || 3000))
+        .map((d, i) => ({
+          ...d,
+          position: i + 1,
+          positionTrend:
+            i + 1 < d.position ? "UP" : i + 1 > d.position ? "DOWN" : "SAME",
+        }));
+    }
 
     if (localRace) {
       leaderboardDataRef.current = {
         ...localRace,
-        currentLap: laps[0]?.lapNumber || 0,
-        currentFlag: raceControlsData[0].flag,
+        currentLap: lapsRef.current[0]?.lapNumber || 0,
+        currentFlag: raceControlsData[0]?.flag || "GREEN",
         drivers: lastDriverData,
       };
       setLeaderboardData(leaderboardDataRef.current);
@@ -151,13 +186,15 @@ export default function Home() {
   };
 
   useEffect(() => {
-    updateLeaderboard();
+    let intervalId: NodeJS.Timeout;
 
-    const intervalId = setInterval(async () => {
-      setFetchingData(true);
-      await updateLeaderboard();
-      setFetchingData(false);
-    }, 10000); // 10000ms = 10 seconds
+    updateLeaderboard().then(() => {
+      intervalId = setInterval(async () => {
+        setFetchingData(true);
+        await updateLeaderboard();
+        setFetchingData(false);
+      }, 10000); // 10000ms = 10 seconds
+    });
 
     // Cleanup the interval when the component unmounts
     return () => clearInterval(intervalId);

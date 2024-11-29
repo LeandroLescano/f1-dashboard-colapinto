@@ -3,7 +3,8 @@ import moment from "moment";
 import clsx from "clsx";
 import {useAutoAnimate} from "@formkit/auto-animate/react";
 
-import {LeaderboardProps} from "@interfaces/Leaderboard";
+import {LeaderboardProps} from "@interfaces/Dashboard";
+import Flag from "@components/Flag";
 import {Trend} from "@components/Trend";
 
 import SegmentDisplay from "./components/Segments";
@@ -39,6 +40,7 @@ export default function Leaderboard({
             <div className="flex flex-row gap-4">
               <p className="text-2xl">{leaderboard.meetingName}</p>
               <p className="text-2xl">Vuelta {leaderboard.currentLap}</p>
+              <Flag type={leaderboard.currentFlag ?? "GREEN"} />
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -114,18 +116,18 @@ export default function Leaderboard({
 
                       <SegmentDisplay
                         isSelected={isDriverSelected}
-                        segments={driver.segmentsSector1}
-                        duration={driver.durationSector1}
+                        segments={driver?.segmentsSector1 || []}
+                        duration={driver?.durationSector1 || 0}
                       />
                       <SegmentDisplay
                         isSelected={isDriverSelected}
-                        segments={driver.segmentsSector2}
-                        duration={driver.durationSector2}
+                        segments={driver?.segmentsSector2 || []}
+                        duration={driver?.durationSector2 || 0}
                       />
                       <SegmentDisplay
                         isSelected={isDriverSelected}
-                        segments={driver.segmentsSector3}
-                        duration={driver.durationSector3}
+                        segments={driver?.segmentsSector3 || []}
+                        duration={driver?.durationSector3 || 0}
                       />
 
                       <CompoundPit driver={driver} />

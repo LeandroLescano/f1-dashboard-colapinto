@@ -72,16 +72,16 @@ export const DriverData = ({driver}: DriverDataProps) => {
 
       <div className="flex flex-row justify-around bg-f1-black-200 text-white rounded-md p-2">
         <SegmentDisplay
-          segments={driver.segmentsSector1}
-          duration={driver.durationSector1}
+          segments={driver?.segmentsSector1 || []}
+          duration={driver?.durationSector1 || 0}
         />
         <SegmentDisplay
-          segments={driver.segmentsSector2}
-          duration={driver.durationSector2}
+          segments={driver?.segmentsSector2 || []}
+          duration={driver?.durationSector2 || 0}
         />
         <SegmentDisplay
-          segments={driver.segmentsSector3}
-          duration={driver.durationSector3}
+          segments={driver?.segmentsSector3 || []}
+          duration={driver?.durationSector3 || 0}
         />
       </div>
 

@@ -33,7 +33,7 @@ export const getCarsData = async (
     params: {
       session_key: sessionKey,
       driver_number: driverNumber,
-      "date>": moment(date).subtract(1, "minute").toDate().toISOString(),
+      "date>": moment(date).subtract(10, "seconds").toDate().toISOString(),
     },
   });
 
