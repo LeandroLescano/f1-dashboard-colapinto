@@ -1,3 +1,5 @@
+import moment from "moment";
+
 import {f1Client} from "@services/axios";
 import {toCamel} from "@utils/object";
 
@@ -31,7 +33,7 @@ export const getCarsData = async (
     params: {
       session_key: sessionKey,
       driver_number: driverNumber,
-      "date<": date,
+      "date>": moment(date).subtract(1, "minute").toDate().toISOString(),
     },
   });
 

@@ -18,7 +18,7 @@ export const getLaps = async (
     params: {
       session_key: sessionKey,
       driver_number: driverNumber,
-      "lap_number<": lapNumber,
+      "lap_number>": lapNumber,
     },
   });
 

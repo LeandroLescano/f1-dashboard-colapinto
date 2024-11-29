@@ -1,6 +1,8 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
+import moment from "moment";
+import dynamic from "next/dynamic";
 
 import Leaderboard from "@components/Leaderboard";
 import {
@@ -19,12 +21,16 @@ import {getPosition} from "@services/positions";
 import {getRaceControls} from "@services/raceControl";
 import {DRIVERS} from "@/constants/drivers";
 import {DriverData} from "@components/DriverData";
-// import {getCarsData} from "@services/carsData";
+import {getCarsData} from "@services/carsData";
 import TableRadioTeams from "@components/TableRadioTeams";
-import TableRaceControls from "@components/TableRaceControls";
+// import TableRaceControls from "@components/TableRaceControls";
 import {RaceControl} from "@services/raceControl/types";
 import SkeletonLeaderboard from "@components/Leaderboard/components/SkeletonLeaderboard";
 import SkeletonDriverData from "@components/DriverData/SkeletonDriverData";
+const TableRaceControls = dynamic(
+  () => import("../components/TableRaceControls"),
+  {ssr: false}
+);
 
 export default function Home() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>();
@@ -36,18 +42,21 @@ export default function Home() {
     sessionName: "",
     sessionDateStart: new Date(),
   });
-  const [ongoingLap, setOngoingLap] = useState(2); //TODO: testing
+  // const [ongoingLap, setOngoingLap] = useState(2); //TODO: testing
+  const [fetchingData, setFetchingData] = useState(false);
+  const leaderboardDataRef = useRef<LeaderboardData>();
 
   const updateLeaderboard = async () => {
     let localDrivers = drivers;
     let localRace = currentRace;
-    const localOngoingLap = ongoingLap; //TODO: testing
-    setOngoingLap(localOngoingLap + 1); //TODO: testing
+    // const localOngoingLap = ongoingLap; //TODO: testing
+    // setOngoingLap(localOngoingLap + 1); //TODO: testing
 
     if (localDrivers.length === 0) {
       localDrivers = await getDrivers("latest");
       setDrivers(localDrivers);
     }
+    let ongoingRace = false;
     if (!localRace.meetingName || !localRace.sessionName) {
       const meeting = await getMeetings("latest");
       const session = await getSessions("latest");
@@ -57,15 +66,24 @@ export default function Home() {
         sessionDateStart: session[0].dateStart as Date,
       };
       setCurrentRace(localRace);
+      if (
+        moment().isAfter(session[0].dateStart) &&
+        moment().isBefore(session[0].dateEnd)
+      ) {
+        ongoingRace = true;
+      }
     }
+    console.log({ongoingRace, d: leaderboardDataRef.current?.drivers});
+    if (!ongoingRace && leaderboardDataRef.current?.drivers) return; // No current race
 
-    const laps = await getLaps("latest", undefined, ongoingLap);
-    const [stints, positions, raceControlsData] = await Promise.all([
-      getStints("latest", undefined, laps[0].lapNumber),
-      getPosition("latest", undefined, laps[0].dateStart),
-      getRaceControls("latest", laps[0].dateStart),
-      // getCarsData("latest", undefined, laps[0].dateStart),
-    ]);
+    const [laps, stints, positions, raceControlsData, carsData] =
+      await Promise.all([
+        getLaps("latest", undefined, leaderboardDataRef.current?.currentLap),
+        getStints("latest", undefined),
+        getPosition("latest", undefined, new Date()),
+        getRaceControls("latest"),
+        getCarsData("latest", undefined, new Date()),
+      ]);
 
     const lastDriverData: LeaderboardDriver[] = [];
 
@@ -80,9 +98,9 @@ export default function Home() {
       const lastLap = laps.find(
         (lap) => lap.driverNumber === driver.driverNumber
       );
-      // const carData = carsData.find(
-      //   (car) => car.driverNumber === driver.driverNumber
-      // );
+      const carData = carsData.find(
+        (car) => car.driverNumber === driver.driverNumber
+      );
       const driverStints = stints.filter(
         (stint) => stint.driverNumber === driver.driverNumber
       );
@@ -91,18 +109,18 @@ export default function Home() {
       );
       const currentPos = driverPositions[0]?.position ?? 0;
       const prevPos =
-        leaderboardData?.drivers.find(
+        leaderboardDataRef.current?.drivers.find(
           (d) => d.driverNumber === driver.driverNumber
         )?.position ?? currentPos;
       const posTrend: PositionTrend =
         currentPos < prevPos ? "UP" : currentPos > prevPos ? "DOWN" : "SAME";
 
-      if (lastLap) {
+      if (lastLap && carData) {
         const teamLogo = driver.teamName?.replaceAll(" ", "").toLowerCase();
         lastDriverData.push({
           ...driver,
           ...lastLap,
-          // ...carData,
+          ...carData,
           logo: teamLogo,
           currentLap: lastLap?.lapNumber || 0,
           stints: driverStints,
@@ -115,23 +133,28 @@ export default function Home() {
     lastDriverData.sort((a, b) => a.position - b.position);
 
     if (localRace) {
-      setLeaderboardData({
+      leaderboardDataRef.current = {
         ...localRace,
         currentLap: laps[0].lapNumber,
         currentFlag: raceControlsData[0].flag,
         drivers: lastDriverData,
-      });
+      };
+      setLeaderboardData(leaderboardDataRef.current);
     }
     setRaceControls(raceControlsData);
   };
 
   useEffect(() => {
-    // const intervalId = setInterval(() => {
     updateLeaderboard();
-    // }, 5000); // 5000ms = 5 seconds //TODO: testing
 
-    // // Cleanup the interval when the component unmounts
-    // return () => clearInterval(intervalId);
+    const intervalId = setInterval(async () => {
+      setFetchingData(true);
+      await updateLeaderboard();
+      setFetchingData(false);
+    }, 10000); // 10000ms = 10 seconds
+
+    // Cleanup the interval when the component unmounts
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -184,6 +207,7 @@ export default function Home() {
           <TableRadioTeams className="w-full h-72 lg:h-full" />
         </div>
       </div>
+      {fetchingData && <p className="absolute">Loading...</p>}
     </div>
   );
 }

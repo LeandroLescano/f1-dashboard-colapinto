@@ -1,3 +1,4 @@
+import {CarData} from "@services/carsData/types";
 import {Driver} from "@services/drivers/types";
 import {Lap} from "@services/laps/types";
 import {Flag} from "@services/raceControl/types";
@@ -7,7 +8,7 @@ export interface LeaderboardData extends CurrentRace {
   drivers: LeaderboardDriver[];
 }
 
-interface LeaderboardDriver extends Driver, Lap {
+interface LeaderboardDriver extends Driver, Lap, CarData {
   logo: string;
   currentLap: number;
   stints: Stint[];
