@@ -20,5 +20,5 @@ export const getSessions = async (
     },
   });
 
-  return toCamel(data) as Session[];
+  return toCamel(data.reverse()) as Session[];
 };

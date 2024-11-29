@@ -23,7 +23,6 @@ import {DRIVERS} from "@/constants/drivers";
 import {DriverData} from "@components/DriverData";
 import {getCarsData} from "@services/carsData";
 import TableRadioTeams from "@components/TableRadioTeams";
-// import TableRaceControls from "@components/TableRaceControls";
 import {RaceControl} from "@services/raceControl/types";
 import SkeletonLeaderboard from "@components/Leaderboard/components/SkeletonLeaderboard";
 import SkeletonDriverData from "@components/DriverData/SkeletonDriverData";
@@ -45,6 +44,7 @@ export default function Home() {
   // const [ongoingLap, setOngoingLap] = useState(2); //TODO: testing
   const [fetchingData, setFetchingData] = useState(false);
   const leaderboardDataRef = useRef<LeaderboardData>();
+  const driversRef = useRef<Driver[]>([]);
 
   const updateLeaderboard = async () => {
     let localDrivers = drivers;
@@ -52,8 +52,9 @@ export default function Home() {
     // const localOngoingLap = ongoingLap; //TODO: testing
     // setOngoingLap(localOngoingLap + 1); //TODO: testing
 
-    if (localDrivers.length === 0) {
+    if (driversRef.current?.length === 0) {
       localDrivers = await getDrivers("latest");
+      driversRef.current = localDrivers;
       setDrivers(localDrivers);
     }
     let ongoingRace = false;
@@ -72,8 +73,13 @@ export default function Home() {
       ) {
         ongoingRace = true;
       }
+      console.log(
+        ongoingRace,
+        session[0],
+        meeting[0],
+        leaderboardDataRef.current?.drivers
+      );
     }
-    console.log({ongoingRace, d: leaderboardDataRef.current?.drivers});
     if (!ongoingRace && leaderboardDataRef.current?.drivers) return; // No current race
 
     const [laps, stints, positions, raceControlsData, carsData] =
@@ -135,7 +141,7 @@ export default function Home() {
     if (localRace) {
       leaderboardDataRef.current = {
         ...localRace,
-        currentLap: laps[0].lapNumber,
+        currentLap: laps[0]?.lapNumber || 0,
         currentFlag: raceControlsData[0].flag,
         drivers: lastDriverData,
       };
@@ -159,14 +165,14 @@ export default function Home() {
 
   return (
     <div className="flex flex-row gap-2 flex-wrap-reverse 2xl:flex-wrap bg-f1-black-300 h-dvh min-h-0 overflow-y-auto lg:overflow-y-hidden">
-      <button
+      {/* <button
         onClick={() => {
           updateLeaderboard();
         }}
         className="bg-red-400 p-3 rounded-lg absolute"
       >
         Update
-      </button>
+      </button>*/}
       <button
         onClick={() => {
           if (leaderboardData) {
@@ -207,7 +213,11 @@ export default function Home() {
           <TableRadioTeams className="w-full h-72 lg:h-full" />
         </div>
       </div>
-      {fetchingData && <p className="absolute">Loading...</p>}
+      {fetchingData && (
+        <p className="absolute left-96 top-7 text-white text-2xl font-formula">
+          Loading...
+        </p>
+      )}
     </div>
   );
 }
