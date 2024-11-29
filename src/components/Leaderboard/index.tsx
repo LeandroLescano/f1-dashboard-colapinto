@@ -3,7 +3,7 @@ import moment from "moment";
 import clsx from "clsx";
 import {useAutoAnimate} from "@formkit/auto-animate/react";
 
-import {LeaderboardData} from "@interfaces/Leaderboard";
+import {LeaderboardProps} from "@interfaces/Leaderboard";
 import {Trend} from "@components/Trend";
 
 import SegmentDisplay from "./components/Segments";
@@ -11,9 +11,8 @@ import CompoundPit from "./components/CompoundPit";
 
 export default function Leaderboard({
   leaderboard,
-}: {
-  leaderboard: LeaderboardData;
-}) {
+  onChangeDriverSelected,
+}: LeaderboardProps) {
   const [parent, enableAnimations] = useAutoAnimate({
     duration: 750,
   });
@@ -81,6 +80,7 @@ export default function Leaderboard({
                       }}
                       onClick={() => {
                         setDriverSelected(driver.driverNumber);
+                        onChangeDriverSelected(driver.driverNumber);
                       }}
                     >
                       <div className="text-center border-r border-f1-gray-300/20 py-3">
