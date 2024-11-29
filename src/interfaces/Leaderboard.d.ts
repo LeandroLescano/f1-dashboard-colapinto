@@ -3,6 +3,12 @@ import {Lap} from "@services/laps/types";
 import {Flag} from "@services/raceControl/types";
 import {Stint} from "@services/stints/types";
 
+export interface LeaderboardProps {
+  onChangeDriverSelected?: (driverNumber: number) => void;
+  leaderboard: LeaderboardData;
+  driverSelected?: number;
+}
+
 export interface LeaderboardData extends CurrentRace {
   drivers: LeaderboardDriver[];
 }

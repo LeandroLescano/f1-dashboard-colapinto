@@ -6,9 +6,10 @@ import {SegmentDisplayProps} from "./types";
 export default function SegmentDisplay({
   segments,
   duration,
+  isSelected = false,
 }: SegmentDisplayProps) {
   return (
-    <div className="flex flex-col text-center">
+    <div className={clsx("flex flex-col text-center", {"gap-1": isSelected})}>
       <div className="flex flex-row gap-1 justify-center">
         {segments?.map((segment, index) => (
           <div
@@ -17,6 +18,7 @@ export default function SegmentDisplay({
               "bg-yellow-500": segment === 2048,
               "bg-green-500": segment === 2049,
               "bg-purple-500": segment === 2051,
+              "w-3 h-5 rounded-md": isSelected,
             })}
             title={`Segment ${index + 1}: ${segment}`}
           />
