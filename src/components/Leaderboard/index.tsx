@@ -11,13 +11,12 @@ import CompoundPit from "./components/CompoundPit";
 
 export default function Leaderboard({
   leaderboard,
+  driverSelected = 43,
   onChangeDriverSelected,
 }: LeaderboardProps) {
   const [parent, enableAnimations] = useAutoAnimate({
     duration: 750,
   });
-
-  const [driverSelected, setDriverSelected] = useState(43);
 
   useEffect(() => {
     enableAnimations(true);
@@ -79,7 +78,6 @@ export default function Leaderboard({
                         backgroundColor: isDriverSelected ? driverColor : "",
                       }}
                       onClick={() => {
-                        setDriverSelected(driver.driverNumber);
                         onChangeDriverSelected?.(driver.driverNumber);
                       }}
                     >
