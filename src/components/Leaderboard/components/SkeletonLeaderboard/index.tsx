@@ -15,7 +15,7 @@ const SkeletonDisplaySegment = ({
         {[...Array(segmentQuantity)].map((_, index) => (
           <Skeleton
             key={`sector-${index}`}
-            className={"w-2 h-3 rounded-md bg-slate-400/50"}
+            className="w-2 h-3 rounded-md bg-slate-400/50"
           />
         ))}
       </div>
