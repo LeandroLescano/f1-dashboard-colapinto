@@ -28,7 +28,7 @@ export default function Home() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [selectedDriver, setSelectedDriver] = useState(43);
-  const [raceControls, setRaceControls] = useState<RaceControl[]>();
+  const [raceControls, setRaceControls] = useState<RaceControl[]>([]);
   const [currentRace, setCurrentRace] = useState<CurrentRace>({
     meetingName: "",
     sessionName: "",
