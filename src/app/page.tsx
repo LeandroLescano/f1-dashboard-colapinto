@@ -158,7 +158,7 @@ export default function Home() {
         <div className="flex flex-row flex-1 min-h-0 h-auto lg:h-100 flex-wrap lg:flex-nowrap">
           <TableRaceControls
             raceControls={raceControls}
-            isLoading={!raceControls}
+            isLoading={!raceControls.length}
             className="w-full h-72 lg:h-full"
           />
           <TableRadioTeams className="w-full h-72 lg:h-full" />
