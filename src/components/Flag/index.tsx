@@ -7,7 +7,7 @@ const flags = {
   CLEAR: "/images/svg/flags/green-flag.svg",
   YELLOW: "/images/svg/flags/yellow-flag.svg",
   BLUE: "/images/svg/flags/blue-flag.svg",
-  "DOUBLE YELLOW": "/images/svg/flags/duoble-yellow-flag.svg",
+  "DOUBLE YELLOW": "/images/svg/flags/double-yellow-flag.svg",
   CHEQUERED: "/images/svg/flags/chequered.svg",
   RED: "/images/svg/flags/red-flag.svg",
 };

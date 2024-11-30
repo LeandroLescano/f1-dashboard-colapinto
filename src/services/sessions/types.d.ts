@@ -13,8 +13,10 @@ export interface SessionDTO {
   meeting_key: number;
   session_key: number;
   session_name: string;
-  session_type: string;
+  session_type: SessionType;
   year: number;
 }
 
 export type Session = CamelizeKeys<SessionDTO>;
+
+export type SessionType = "Practice" | "Qualifying" | "Race";

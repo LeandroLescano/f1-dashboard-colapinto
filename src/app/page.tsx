@@ -27,11 +27,16 @@ import {RaceControl} from "@services/raceControl/types";
 import SkeletonLeaderboard from "@components/Leaderboard/components/SkeletonLeaderboard";
 import SkeletonDriverData from "@components/DriverData/SkeletonDriverData";
 import {Lap} from "@services/laps/types";
+import {CarData} from "@services/carsData/types";
+import {Stint} from "@services/stints/types";
+import {Position} from "@services/positions/types";
+import {Session, SessionType} from "@services/sessions/types";
 
 const TableRaceControls = dynamic(
   () => import("../components/TableRaceControls"),
   {ssr: false}
 );
+const DEFAULT_POSITION = 20;
 
 export default function Home() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>();
@@ -51,6 +56,8 @@ export default function Home() {
   const updateLeaderboard = async () => {
     let localDrivers = driversRef.current;
     let localRace = currentRace;
+    let meeting;
+    let session;
     // const localOngoingLap = ongoingLap; //TODO: testing
     // setOngoingLap(localOngoingLap + 1); //TODO: testing
 
@@ -58,33 +65,29 @@ export default function Home() {
       localDrivers = await getDrivers("latest");
       driversRef.current = localDrivers;
     }
+
     let ongoingRace = false;
-    let meeting;
-    let session;
     if (!localRace.meetingName || !localRace.sessionName) {
-      meeting = await getMeetings("latest");
-      session = await getSessions("latest");
+      meeting = (await getMeetings("latest"))[0];
+      session = (await getSessions("latest"))[0];
       localRace = {
-        meetingName: meeting[0].meetingName,
-        sessionName: session[0].sessionName,
-        sessionDateStart: session[0].dateStart as Date,
+        meetingName: meeting.meetingName,
+        sessionName: session.sessionName,
+        sessionDateStart: session.dateStart as Date,
       };
 
       setCurrentRace(localRace);
       if (
-        moment().isAfter(session[0].dateStart) &&
-        moment().isBefore(session[0].dateEnd)
+        moment().isAfter(session.dateStart) &&
+        moment().isBefore(session.dateEnd)
       ) {
         ongoingRace = true;
       }
-      console.log(
-        ongoingRace,
-        session[0],
-        meeting[0],
-        leaderboardDataRef.current?.drivers
-      );
     }
-    if (!ongoingRace && leaderboardDataRef.current?.drivers) return; // No current race
+
+    if ((!ongoingRace && leaderboardDataRef.current?.drivers) || !session) {
+      return; // No current race
+    }
 
     const fromLap =
       lapsRef.current.length === 0 ? 0 : leaderboardDataRef.current?.currentLap;
@@ -100,78 +103,13 @@ export default function Home() {
 
     lapsRef.current = [...laps, ...lapsRef.current];
 
-    const lastDriverData: LeaderboardDriver[] = [];
-
-    for (let driver of localDrivers) {
-      if (DRIVERS[driver.driverNumber]) {
-        driver = {
-          ...driver,
-          ...DRIVERS[driver.driverNumber],
-        };
-      }
-
-      const driverLaps = lapsRef.current.filter(
-        (lap) => lap.driverNumber === driver.driverNumber
-      );
-
-      const lastLap = driverLaps[0];
-      const carData = carsData.find(
-        (car) => car.driverNumber === driver.driverNumber
-      );
-      const driverStints = stints.filter(
-        (stint) => stint.driverNumber === driver.driverNumber
-      );
-      const driverPositions = positions.filter(
-        (position) => position.driverNumber === driver.driverNumber
-      );
-      const currentPos = driverPositions[0]?.position ?? 0;
-      const prevPos =
-        leaderboardDataRef.current?.drivers.find(
-          (d) => d.driverNumber === driver.driverNumber
-        )?.position ?? currentPos;
-      const posTrend: PositionTrend =
-        currentPos < prevPos ? "UP" : currentPos > prevPos ? "DOWN" : "SAME";
-
-      // if (lastLap && carData) {
-      const teamLogo = driver.teamName?.replaceAll(" ", "").toLowerCase();
-      console.log({driverLaps});
-      let driverLapDuration =
-        session?.[0].sessionType === "RACE"
-          ? lastLap?.lapDuration
-          : Math.min(
-              ...driverLaps
-                .filter((d) => d.lapDuration && d.lapDuration > 0)
-                .map((lap) => lap.lapDuration)
-            );
-
-      if (!isFinite(driverLapDuration)) driverLapDuration = 0;
-
-      lastDriverData.push({
-        ...driver,
-        ...lastLap,
-        ...carData,
-        lapDuration: driverLapDuration,
-        logo: teamLogo,
-        currentLap: lastLap?.lapNumber || 0,
-        stints: driverStints,
-        position: currentPos,
-        positionTrend: posTrend,
-      });
-      // }
-    }
-
-    if (session?.[0].sessionType === "RACE") {
-      lastDriverData.sort((a, b) => a.position - b.position);
-    } else {
-      lastDriverData
-        .sort((a, b) => (a.lapDuration || 30000) - (b.lapDuration || 3000))
-        .map((d, i) => ({
-          ...d,
-          position: i + 1,
-          positionTrend:
-            i + 1 < d.position ? "UP" : i + 1 > d.position ? "DOWN" : "SAME",
-        }));
-    }
+    const lastDriverData: LeaderboardDriver[] = getDriversData(
+      session,
+      localDrivers,
+      carsData,
+      stints,
+      positions
+    );
 
     if (localRace) {
       leaderboardDataRef.current = {
@@ -182,7 +120,139 @@ export default function Home() {
       };
       setLeaderboardData(leaderboardDataRef.current);
     }
+
     setRaceControls(raceControlsData);
+  };
+
+  const getDriversData = (
+    session: Session,
+    drivers: Driver[],
+    carsData: CarData[],
+    stints: Stint[],
+    positions: Position[]
+  ) => {
+    const lastDriverData: LeaderboardDriver[] = [];
+
+    for (let driver of drivers) {
+      if (DRIVERS[driver.driverNumber]) {
+        driver = {
+          ...driver,
+          ...DRIVERS[driver.driverNumber],
+        };
+      }
+
+      const driverLaps = lapsRef.current.filter(
+        (lap) => lap.driverNumber === driver.driverNumber
+      );
+      const lastLap = driverLaps[0];
+
+      const carData = carsData.find(
+        (car) => car.driverNumber === driver.driverNumber
+      );
+
+      const driverStints = stints.filter(
+        (stint) => stint.driverNumber === driver.driverNumber
+      );
+
+      const {currentPos, posTrend} = getDriverPositionAndTrend(
+        driver,
+        positions,
+        session.sessionType
+      );
+
+      const driverLapDuration = getDriverLapDuration(
+        lastLap,
+        driverLaps,
+        session.sessionType
+      );
+
+      lastDriverData.push({
+        ...driver,
+        ...lastLap,
+        ...carData,
+        lapDuration: driverLapDuration,
+        logo: driver.teamName?.replaceAll(" ", "").toLowerCase(),
+        currentLap: lastLap?.lapNumber || 0,
+        stints: driverStints,
+        position: currentPos,
+        positionTrend: posTrend,
+      });
+    }
+
+    sortDrivers(lastDriverData, session.sessionType);
+
+    return lastDriverData;
+  };
+
+  const sortDrivers = (
+    drivers: LeaderboardDriver[],
+    sessionType: SessionType
+  ) => {
+    if (sessionType === "Race") {
+      drivers.sort((a, b) => a.position - b.position);
+    } else {
+      drivers = drivers
+        .sort((a, b) => {
+          a.lapDuration ??= 0;
+          b.lapDuration ??= 0;
+
+          if (a.lapDuration === 0 && b.lapDuration === 0) return 0;
+          if (a.lapDuration === 0) return 1;
+          if (b.lapDuration === 0) return -1;
+
+          return a.lapDuration - b.lapDuration;
+        })
+        .map((d, i) => ({
+          ...d,
+          position: i + 1,
+          positionTrend:
+            i + 1 < d.position ? "UP" : i + 1 > d.position ? "DOWN" : "SAME",
+        }));
+    }
+  };
+
+  const getDriverPositionAndTrend = (
+    driver: Driver,
+    positions: Position[],
+    sessionType: SessionType
+  ): {currentPos: number; posTrend: PositionTrend} => {
+    const driverPositions = positions.filter(
+      (position) => position.driverNumber === driver.driverNumber
+    );
+    // If session is Practice or Qualifying the position is based on the better lap duration
+    let currentPos = DEFAULT_POSITION;
+
+    if (sessionType === "Race") {
+      currentPos = driverPositions[0]?.position ?? DEFAULT_POSITION;
+    }
+
+    const prevPos =
+      leaderboardDataRef.current?.drivers.find(
+        (d) => d.driverNumber === driver.driverNumber
+      )?.position ?? currentPos;
+
+    const posTrend =
+      currentPos < prevPos ? "UP" : currentPos > prevPos ? "DOWN" : "SAME";
+
+    return {currentPos, posTrend};
+  };
+
+  const getDriverLapDuration = (
+    lastLap: Lap,
+    driverLaps: Lap[],
+    sessionType: SessionType
+  ): number => {
+    let lapDuration = lastLap?.lapDuration ?? 0;
+
+    if (sessionType !== "Race") {
+      for (const driverLap of driverLaps) {
+        if (driverLap?.lapDuration > 0 && driverLap.lapDuration < lapDuration) {
+          lapDuration = driverLap.lapDuration;
+        }
+      }
+    }
+
+    return lapDuration;
   };
 
   useEffect(() => {
@@ -196,7 +266,6 @@ export default function Home() {
       }, 10000); // 10000ms = 10 seconds
     });
 
-    // Cleanup the interval when the component unmounts
     return () => clearInterval(intervalId);
   }, []);
 
