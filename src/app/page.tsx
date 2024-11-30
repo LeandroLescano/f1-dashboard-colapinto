@@ -74,14 +74,17 @@ export default function Home() {
 
       currentRace.current = localRace;
       if (
-        moment().isAfter(session.dateStart) &&
-        moment().isBefore(session.dateEnd)
+        moment().isAfter(localRace.session?.dateStart) &&
+        moment().isBefore(localRace.session?.dateEnd)
       ) {
         ongoingRace = true;
       }
     }
 
-    if ((!ongoingRace && leaderboardDataRef.current?.drivers) || !session) {
+    if (
+      (!ongoingRace && leaderboardDataRef.current?.drivers) ||
+      !localRace.session
+    ) {
       return; // No current race
     }
 
