@@ -1,7 +1,9 @@
 import {CarData} from "@services/carsData/types";
 import {Driver} from "@services/drivers/types";
 import {Lap} from "@services/laps/types";
+import {Meeting} from "@services/meetings/types";
 import {Flag} from "@services/raceControl/types";
+import {Session} from "@services/sessions/types";
 import {Stint} from "@services/stints/types";
 
 export interface LeaderboardProps {
@@ -23,9 +25,8 @@ interface LeaderboardDriver extends Driver, Partial<Lap>, Partial<CarData> {
 }
 
 export interface CurrentRace {
-  meetingName: string;
-  sessionName: string;
-  sessionDateStart: Date;
+  session?: Session;
+  meeting?: Meeting;
   totalLaps?: number;
   currentLap?: number;
   currentFlag?: Flag;

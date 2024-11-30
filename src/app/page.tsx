@@ -42,11 +42,8 @@ export default function Home() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>();
   const [selectedDriver, setSelectedDriver] = useState(43);
   const [raceControls, setRaceControls] = useState<RaceControl[]>([]);
-  const [currentRace, setCurrentRace] = useState<CurrentRace>({
-    meetingName: "",
-    sessionName: "",
-    sessionDateStart: new Date(),
-  });
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const currentRace = useRef<CurrentRace>({});
   // const [ongoingLap, setOngoingLap] = useState(2); //TODO: testing
   const [fetchingData, setFetchingData] = useState(false);
   const leaderboardDataRef = useRef<LeaderboardData>();
@@ -55,28 +52,27 @@ export default function Home() {
 
   const updateLeaderboard = async () => {
     let localDrivers = driversRef.current;
-    let localRace = currentRace;
-    let meeting;
-    let session;
+    let localRace = currentRace.current;
     // const localOngoingLap = ongoingLap; //TODO: testing
     // setOngoingLap(localOngoingLap + 1); //TODO: testing
-
     if (driversRef.current?.length === 0) {
       localDrivers = await getDrivers("latest");
       driversRef.current = localDrivers;
+      setDrivers(localDrivers);
     }
 
     let ongoingRace = false;
-    if (!localRace.meetingName || !localRace.sessionName) {
-      meeting = (await getMeetings("latest"))[0];
-      session = (await getSessions("latest"))[0];
+    if (!localRace.meeting?.meetingName || !localRace.session?.sessionName) {
+      const [meetings, sessions] = await Promise.all([
+        getMeetings("latest"),
+        getSessions("latest"),
+      ]);
       localRace = {
-        meetingName: meeting.meetingName,
-        sessionName: session.sessionName,
-        sessionDateStart: session.dateStart as Date,
+        meeting: meetings[0],
+        session: sessions[0],
       };
 
-      setCurrentRace(localRace);
+      currentRace.current = localRace;
       if (
         moment().isAfter(session.dateStart) &&
         moment().isBefore(session.dateEnd)
@@ -104,7 +100,7 @@ export default function Home() {
     lapsRef.current = [...laps, ...lapsRef.current];
 
     const lastDriverData: LeaderboardDriver[] = getDriversData(
-      session,
+      localRace.session,
       localDrivers,
       carsData,
       stints,
@@ -131,7 +127,7 @@ export default function Home() {
     stints: Stint[],
     positions: Position[]
   ) => {
-    const lastDriverData: LeaderboardDriver[] = [];
+    const lastDriversData: LeaderboardDriver[] = [];
 
     for (let driver of drivers) {
       if (DRIVERS[driver.driverNumber]) {
@@ -154,11 +150,18 @@ export default function Home() {
         (stint) => stint.driverNumber === driver.driverNumber
       );
 
-      const {currentPos, posTrend} = getDriverPositionAndTrend(
-        driver,
-        positions,
-        session.sessionType
-      );
+      let currentPos = leaderboardDataRef.current?.drivers.find(
+        (d) => d.driverNumber === driver.driverNumber
+      )?.position;
+      let posTrend: PositionTrend = "SAME";
+
+      if (session.sessionType === "Race") {
+        ({currentPos, posTrend} = getDriverPositionAndTrend(
+          driver,
+          positions,
+          session.sessionType
+        ));
+      }
 
       const driverLapDuration = getDriverLapDuration(
         lastLap,
@@ -166,7 +169,7 @@ export default function Home() {
         session.sessionType
       );
 
-      lastDriverData.push({
+      lastDriversData.push({
         ...driver,
         ...lastLap,
         ...carData,
@@ -174,14 +177,12 @@ export default function Home() {
         logo: driver.teamName?.replaceAll(" ", "").toLowerCase(),
         currentLap: lastLap?.lapNumber || 0,
         stints: driverStints,
-        position: currentPos,
+        position: currentPos ?? DEFAULT_POSITION,
         positionTrend: posTrend,
       });
     }
 
-    sortDrivers(lastDriverData, session.sessionType);
-
-    return lastDriverData;
+    return sortDrivers(lastDriversData, session.sessionType);
   };
 
   const sortDrivers = (
@@ -202,13 +203,22 @@ export default function Home() {
 
           return a.lapDuration - b.lapDuration;
         })
-        .map((d, i) => ({
-          ...d,
-          position: i + 1,
-          positionTrend:
+        .map((d, i) => {
+          console.log(
             i + 1 < d.position ? "UP" : i + 1 > d.position ? "DOWN" : "SAME",
-        }));
+            i + 1,
+            d.position
+          );
+          return {
+            ...d,
+            position: i + 1,
+            positionTrend:
+              i + 1 < d.position ? "UP" : i + 1 > d.position ? "DOWN" : "SAME",
+          };
+        });
     }
+
+    return drivers;
   };
 
   const getDriverPositionAndTrend = (
@@ -316,11 +326,14 @@ export default function Home() {
             isLoading={!raceControls.length}
             className="w-full h-72 lg:h-full"
           />
-          <TableRadioTeams className="w-full h-72 lg:h-full" />
+          <TableRadioTeams
+            className="w-full h-72 lg:h-full"
+            drivers={drivers}
+          />
         </div>
       </div>
       {fetchingData && (
-        <p className="absolute left-96 top-7 text-white text-2xl font-formula">
+        <p className="absolute left-[550px] top-7 text-white text-2xl font-formula">
           Loading...
         </p>
       )}

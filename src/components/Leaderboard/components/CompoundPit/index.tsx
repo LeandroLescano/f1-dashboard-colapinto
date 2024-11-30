@@ -9,25 +9,25 @@ const CompoundPit = ({driver, className}: CompoundPitProps) => {
       <div className="flex flex-row justify-start">
         <p
           className={clsx("w-5 text-center", {
-            "text-red-500": driver.stints[0].compound === "SOFT",
-            "text-yellow-400": driver.stints[0].compound === "MEDIUM",
-            "text-white": driver.stints[0].compound === "HARD",
-            "text-green-600": driver.stints[0].compound === "INTERMEDIATE",
-            "text-blue-600": driver.stints[0].compound === "WET",
+            "text-red-500": driver.stints[0]?.compound === "SOFT",
+            "text-yellow-400": driver.stints[0]?.compound === "MEDIUM",
+            "text-white": driver.stints[0]?.compound === "HARD",
+            "text-green-600": driver.stints[0]?.compound === "INTERMEDIATE",
+            "text-blue-600": driver.stints[0]?.compound === "WET",
           })}
         >
-          {driver.stints[0].compound?.charAt(0)}
+          {driver.stints[0]?.compound?.charAt(0) ?? "?"}
         </p>
         <p className="pl-1">-</p>
         <p className="text-center w-7">
-          {driver.currentLap
+          {driver.currentLap && driver.stints[0]
             ? driver.currentLap - driver.stints[0].lapStart
             : "0"}
         </p>
       </div>
       <p className={className ? "" : "text-gray-500"}>|</p>
       <p className={className ? "" : "text-gray-500"}>
-        PIT {driver.stints.length - 1}
+        PIT {driver.stints.length ? driver.stints.length - 1 : 0}
       </p>
     </div>
   );

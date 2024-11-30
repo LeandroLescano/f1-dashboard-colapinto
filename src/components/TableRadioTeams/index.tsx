@@ -5,8 +5,6 @@ import clsx from "clsx";
 
 import {TeamRadio} from "@services/teamRadio/types";
 import {getRadioExchanges} from "@services/teamRadio";
-import {getDrivers} from "@services/drivers";
-import {Driver} from "@services/drivers/types";
 
 import {TableRadioTeamsProps, TeamRadioExtend} from "./types";
 import AudioPlayer from "./components/AudioPlayer";
@@ -17,6 +15,7 @@ import SkeletonTable from "./components/SkeletonTable";
  * @param {string} className additional classes
  */
 const TableRadioTeams = ({
+  drivers = [],
   sessionKey = "latest",
   className,
 }: TableRadioTeamsProps) => {
@@ -25,45 +24,40 @@ const TableRadioTeams = ({
 
   const handlerFetchData = async () => {
     let radiosExchangeAux: TeamRadio[] = [];
-    let driversAux: Driver[] = [];
 
     await getRadioExchanges(sessionKey).then((radios) => {
       radiosExchangeAux = radios;
     });
 
-    await getDrivers(sessionKey)
-      .then((drivers) => {
-        driversAux = drivers;
-      })
-      .then(() => {
-        setRadioExchanges(() => {
-          const radioExchangesExtend = radiosExchangeAux.map((radio) => {
-            return {
-              ...radio,
-              driver: driversAux.find(
-                (driver) => driver.driverNumber === radio.driverNumber
-              ),
-            };
-          });
-          return radioExchangesExtend;
-        });
+    setRadioExchanges(() => {
+      const radioExchangesExtend = radiosExchangeAux.map((radio) => {
+        return {
+          ...radio,
+          driver: drivers.find(
+            (driver) => driver.driverNumber === radio.driverNumber
+          ),
+        };
       });
+      return radioExchangesExtend;
+    });
 
     setIsLoading(false);
   };
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    if (drivers.length) {
+      let intervalId: NodeJS.Timeout;
 
-    handlerFetchData().then(() => {
-      intervalId = setInterval(async () => {
-        handlerFetchData();
-      }, 20000); // 20000ms = 20 seconds
+      handlerFetchData().then(() => {
+        intervalId = setInterval(async () => {
+          handlerFetchData();
+        }, 20000); // 20000ms = 20 seconds
 
-      // Cleanup the interval when the component unmounts
-    });
-    return () => clearInterval(intervalId);
-  }, []);
+        // Cleanup the interval when the component unmounts
+      });
+      return () => clearInterval(intervalId);
+    }
+  }, [drivers]);
 
   return (
     <div

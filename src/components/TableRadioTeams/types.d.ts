@@ -1,6 +1,7 @@
 import {TeamRadio} from "@services/teamRadio/types";
 
 export interface TableRadioTeamsProps {
+  drivers: Driver[];
   sessionKey?: number | "latest";
   className?: string;
 }

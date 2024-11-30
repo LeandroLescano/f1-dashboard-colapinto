@@ -35,10 +35,12 @@ export default function Leaderboard({
                 height={100}
                 alt="F1 logo"
               />
-              <p className="text-4xl font-bold">{leaderboard.sessionName}</p>
+              <p className="text-4xl font-bold">
+                {leaderboard.session?.sessionName}
+              </p>
             </div>
             <div className="flex flex-row gap-4">
-              <p className="text-2xl">{leaderboard.meetingName}</p>
+              <p className="text-2xl">{leaderboard.meeting?.meetingName}</p>
               <p className="text-2xl">Vuelta {leaderboard.currentLap}</p>
               <Flag type={leaderboard.currentFlag ?? "GREEN"} />
             </div>
