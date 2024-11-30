@@ -20,7 +20,9 @@ export const getPosition = async (
     params: {
       session_key: sessionKey,
       driver_number: driverNumber,
-      "date>": moment(dateStart).subtract(30, "seconds").toDate().toISOString(),
+      "date>":
+        dateStart &&
+        moment(dateStart).subtract(2, "minutes").toDate().toISOString(),
     },
   });
 

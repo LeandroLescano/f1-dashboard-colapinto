@@ -1,5 +1,6 @@
 import React from "react";
 import moment from "moment";
+import clsx from "clsx";
 
 import {Trend} from "@components/Trend";
 import SegmentDisplay from "@components/Leaderboard/components/Segments";
@@ -62,7 +63,11 @@ export const DriverData = ({driver}: DriverDataProps) => {
         </div>
         <div>
           <p className="text-sm opacity-75">Tiempo de vuelta</p>
-          <p className="text-xl font-bold">
+          <p
+            className={clsx("text-xl font-bold", {
+              "text-violet-400": driver.hasBestLap,
+            })}
+          >
             {driver.lapDuration
               ? moment.utc(driver.lapDuration * 1000).format("m:ss.SSS")
               : "0:00.000"}

@@ -42,7 +42,11 @@ export default function Leaderboard({
             <div className="flex flex-row gap-4">
               <p className="text-2xl">{leaderboard.meeting?.meetingName}</p>
               <p className="text-2xl">Vuelta {leaderboard.currentLap}</p>
-              <Flag type={leaderboard.currentFlag ?? "GREEN"} />
+              <Flag
+                type={leaderboard.currentFlag ?? "GREEN"}
+                height={30}
+                width={30}
+              />
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -107,7 +111,11 @@ export default function Leaderboard({
                           {driver.nameAcronym}
                         </p>
                       </div>
-                      <div className="text-center">
+                      <div
+                        className={clsx("text-center", {
+                          "text-violet-400": driver.hasBestLap,
+                        })}
+                      >
                         {driver.lapDuration
                           ? moment
                               .utc(driver.lapDuration * 1000)

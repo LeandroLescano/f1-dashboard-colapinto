@@ -62,6 +62,7 @@ export default function Home() {
     }
 
     let ongoingRace = false;
+    let raceAboutToStart = false;
     if (!localRace.meeting?.meetingName || !localRace.session?.sessionName) {
       const [meetings, sessions] = await Promise.all([
         getMeetings("latest"),
@@ -73,12 +74,20 @@ export default function Home() {
       };
 
       currentRace.current = localRace;
-      if (
-        moment().isAfter(localRace.session?.dateStart) &&
-        moment().isBefore(localRace.session?.dateEnd)
-      ) {
-        ongoingRace = true;
-      }
+    }
+
+    if (
+      moment().isAfter(localRace.session?.dateStart) &&
+      moment().isBefore(localRace.session?.dateEnd)
+    ) {
+      ongoingRace = true;
+    }
+
+    if (
+      moment().isBefore(localRace.session?.dateStart) &&
+      moment().isBefore(localRace.session?.dateEnd)
+    ) {
+      raceAboutToStart = true;
     }
 
     if (
@@ -95,7 +104,11 @@ export default function Home() {
       await Promise.all([
         getLaps("latest", undefined, fromLap),
         getStints("latest", undefined),
-        getPosition("latest", undefined, new Date()),
+        getPosition(
+          "latest",
+          undefined,
+          raceAboutToStart ? undefined : new Date()
+        ),
         getRaceControls("latest"),
         getCarsData("latest", undefined, new Date()),
       ]);
@@ -107,7 +120,8 @@ export default function Home() {
       localDrivers,
       carsData,
       stints,
-      positions
+      positions,
+      ongoingRace
     );
 
     if (localRace) {
@@ -128,9 +142,18 @@ export default function Home() {
     drivers: Driver[],
     carsData: CarData[],
     stints: Stint[],
-    positions: Position[]
+    positions: Position[],
+    raceAboutToStart: boolean
   ) => {
     const lastDriversData: LeaderboardDriver[] = [];
+
+    const bestLap = lapsRef.current
+      .map((lap) => ({
+        driverNumber: lap.driverNumber,
+        lapDuration: lap.lapDuration,
+      }))
+      .filter((lap) => lap.lapDuration > 0)
+      .sort((a, b) => a.lapDuration - b.lapDuration)[0];
 
     for (let driver of drivers) {
       if (DRIVERS[driver.driverNumber]) {
@@ -158,16 +181,16 @@ export default function Home() {
       )?.position;
       let posTrend: PositionTrend = "SAME";
 
-      if (session.sessionType === "Race") {
+      if (session.sessionType === "Race" || raceAboutToStart) {
         ({currentPos, posTrend} = getDriverPositionAndTrend(
           driver,
           positions,
-          session.sessionType
+          session.sessionType,
+          raceAboutToStart
         ));
       }
 
       const driverLapDuration = getDriverLapDuration(
-        lastLap,
         driverLaps,
         session.sessionType
       );
@@ -182,17 +205,19 @@ export default function Home() {
         stints: driverStints,
         position: currentPos ?? DEFAULT_POSITION,
         positionTrend: posTrend,
+        hasBestLap: bestLap?.driverNumber === driver.driverNumber,
       });
     }
 
-    return sortDrivers(lastDriversData, session.sessionType);
+    return sortDrivers(lastDriversData, session.sessionType, raceAboutToStart);
   };
 
   const sortDrivers = (
     drivers: LeaderboardDriver[],
-    sessionType: SessionType
+    sessionType: SessionType,
+    raceAboutToStart: boolean
   ) => {
-    if (sessionType === "Race") {
+    if (sessionType === "Race" || raceAboutToStart) {
       drivers.sort((a, b) => a.position - b.position);
     } else {
       drivers = drivers
@@ -207,11 +232,6 @@ export default function Home() {
           return a.lapDuration - b.lapDuration;
         })
         .map((d, i) => {
-          console.log(
-            i + 1 < d.position ? "UP" : i + 1 > d.position ? "DOWN" : "SAME",
-            i + 1,
-            d.position
-          );
           return {
             ...d,
             position: i + 1,
@@ -227,7 +247,8 @@ export default function Home() {
   const getDriverPositionAndTrend = (
     driver: Driver,
     positions: Position[],
-    sessionType: SessionType
+    sessionType: SessionType,
+    raceAboutToStart: boolean
   ): {currentPos: number; posTrend: PositionTrend} => {
     const driverPositions = positions.filter(
       (position) => position.driverNumber === driver.driverNumber
@@ -235,7 +256,7 @@ export default function Home() {
     // If session is Practice or Qualifying the position is based on the better lap duration
     let currentPos = DEFAULT_POSITION;
 
-    if (sessionType === "Race") {
+    if (sessionType === "Race" || raceAboutToStart) {
       currentPos = driverPositions[0]?.position ?? DEFAULT_POSITION;
     }
 
@@ -251,11 +272,10 @@ export default function Home() {
   };
 
   const getDriverLapDuration = (
-    lastLap: Lap,
     driverLaps: Lap[],
     sessionType: SessionType
   ): number => {
-    let lapDuration = lastLap?.lapDuration ?? 0;
+    let lapDuration = driverLaps.find((l) => l.lapDuration)?.lapDuration ?? 0;
 
     if (sessionType !== "Race") {
       for (const driverLap of driverLaps) {
@@ -276,7 +296,7 @@ export default function Home() {
         setFetchingData(true);
         await updateLeaderboard();
         setFetchingData(false);
-      }, 10000); // 10000ms = 10 seconds
+      }, 5000); // 5000ms = 5 seconds
     });
 
     return () => clearInterval(intervalId);

@@ -22,6 +22,7 @@ interface LeaderboardDriver extends Driver, Partial<Lap>, Partial<CarData> {
   stints: Stint[];
   position: number;
   positionTrend: PositionTrend;
+  hasBestLap: boolean;
 }
 
 export interface CurrentRace {
