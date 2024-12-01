@@ -77,8 +77,10 @@ export default function Home() {
     }
 
     if (
-      moment().isAfter(localRace.session?.dateStart) &&
-      moment().isBefore(localRace.session?.dateEnd)
+      moment().isBetween(
+        localRace.session?.dateStart,
+        localRace.session?.dateEnd
+      )
     ) {
       ongoingRace = true;
     }
@@ -121,7 +123,7 @@ export default function Home() {
       carsData,
       stints,
       positions,
-      ongoingRace
+      raceAboutToStart
     );
 
     if (localRace) {
@@ -275,7 +277,8 @@ export default function Home() {
     driverLaps: Lap[],
     sessionType: SessionType
   ): number => {
-    let lapDuration = driverLaps.find((l) => l.lapDuration)?.lapDuration ?? 0;
+    let lapDuration =
+      driverLaps.find((l) => l.lapDuration > 0)?.lapDuration ?? 0;
 
     if (sessionType !== "Race") {
       for (const driverLap of driverLaps) {
