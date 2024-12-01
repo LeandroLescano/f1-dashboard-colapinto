@@ -18,7 +18,7 @@ export const getStints = async (
     params: {
       session_key: sessionKey,
       driver_number: driverNumber,
-      "lap_start<": lapStart,
+      "lap_start>": lapStart,
     },
   });
 

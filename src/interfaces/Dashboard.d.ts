@@ -20,7 +20,7 @@ interface LeaderboardDriver extends Driver, Partial<Lap>, Partial<CarData> {
   logo: string;
   currentLap: number;
   stints: Stint[];
-  position: number;
+  position?: number;
   positionTrend: PositionTrend;
   hasBestLap: boolean;
 }

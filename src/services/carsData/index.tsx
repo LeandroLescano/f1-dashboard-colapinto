@@ -1,5 +1,3 @@
-import moment from "moment";
-
 import {f1Client} from "@services/axios";
 import {toCamel} from "@utils/object";
 
@@ -29,13 +27,18 @@ export const getCarsData = async (
   driverNumber?: number,
   date?: Date
 ): Promise<CarData[]> => {
-  const {data} = await f1Client.get<CarDataDTO[]>("/car_data", {
-    params: {
-      session_key: sessionKey,
-      driver_number: driverNumber,
-      "date>": moment(date).subtract(10, "seconds").toDate().toISOString(),
-    },
-  });
+  try {
+    const {data} = await f1Client.get<CarDataDTO[]>("/car_data", {
+      params: {
+        session_key: sessionKey,
+        driver_number: driverNumber,
+        "date>": date,
+      },
+    });
 
-  return toCamel(data) as CarData[];
+    return toCamel(data) as CarData[];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 };

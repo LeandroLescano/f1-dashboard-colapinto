@@ -26,7 +26,7 @@ export default function Leaderboard({
   return (
     <div className="max-w-full font-formula lg:max-w-[1250px]">
       <div className="flex flex-col gap-4 text-white bg-f1-black-200 mx-auto p-1 rounded-xl">
-        <div className="flex flex-col gap-1 bg-f1-black-300 rounded-lg border-2 border-f1-gray-300/50">
+        <div className="flex flex-col gap-1 bg-f1-black-300 rounded-lg border-2 border-f1-gray-300/50 max-h-auto lg:max-h-dvh">
           <div className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
             <div className="flex flex-row gap-1 items-center">
               <img

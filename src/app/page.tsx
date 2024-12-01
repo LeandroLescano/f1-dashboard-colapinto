@@ -31,6 +31,8 @@ import {CarData} from "@services/carsData/types";
 import {Stint} from "@services/stints/types";
 import {Position} from "@services/positions/types";
 import {Session, SessionType} from "@services/sessions/types";
+import {mergeLaps} from "@utils/laps";
+import {mergeCarsData} from "@utils/carsData";
 
 const TableRaceControls = dynamic(
   () => import("../components/TableRaceControls"),
@@ -44,17 +46,18 @@ export default function Home() {
   const [raceControls, setRaceControls] = useState<RaceControl[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const currentRace = useRef<CurrentRace>({});
-  // const [ongoingLap, setOngoingLap] = useState(2); //TODO: testing
   const [fetchingData, setFetchingData] = useState(false);
   const leaderboardDataRef = useRef<LeaderboardData>();
   const driversRef = useRef<Driver[]>([]);
   const lapsRef = useRef<Lap[]>([]);
+  const stintsRef = useRef<Stint[]>([]);
+  const positionsRef = useRef<Position[]>([]);
+  const raceControlsRef = useRef<RaceControl[]>([]);
+  const carsDataRef = useRef<CarData[]>([]);
 
   const updateLeaderboard = async () => {
     let localDrivers = driversRef.current;
     let localRace = currentRace.current;
-    // const localOngoingLap = ongoingLap; //TODO: testing
-    // setOngoingLap(localOngoingLap + 1); //TODO: testing
     if (driversRef.current?.length === 0) {
       localDrivers = await getDrivers("latest");
       driversRef.current = localDrivers;
@@ -100,22 +103,44 @@ export default function Home() {
     }
 
     const fromLap =
-      lapsRef.current.length === 0 ? 0 : leaderboardDataRef.current?.currentLap;
+      lapsRef.current.length === 0 ? 0 : lapsRef.current[0].lapNumber;
 
-    const [laps, stints, positions, raceControlsData, carsData] =
+    const [lapsData, stintsData, positionsData, raceControlsData2, carsData2] =
       await Promise.all([
         getLaps("latest", undefined, fromLap),
-        getStints("latest", undefined),
+        getStints("latest", undefined, stintsRef.current[0]?.lapEnd),
         getPosition(
           "latest",
           undefined,
-          raceAboutToStart ? undefined : new Date()
+          raceAboutToStart
+            ? undefined
+            : positionsRef.current[0]?.date
+            ? moment(positionsRef.current[0].date).add(1, "second").toDate()
+            : undefined
         ),
-        getRaceControls("latest"),
-        getCarsData("latest", undefined, new Date()),
+        getRaceControls(
+          "latest",
+          raceControlsRef.current[0]?.date
+            ? moment(raceControlsRef.current[0].date).add(1, "second").toDate()
+            : undefined
+        ),
+        getCarsData("latest", undefined, carsDataRef.current[0]?.date),
       ]);
 
-    lapsRef.current = [...laps, ...lapsRef.current];
+    lapsRef.current = mergeLaps(lapsData, lapsRef.current);
+    stintsRef.current = [...stintsData, ...stintsRef.current];
+    positionsRef.current = [...positionsData, ...positionsRef.current];
+    raceControlsRef.current = [
+      ...raceControlsData2,
+      ...raceControlsRef.current,
+    ];
+    carsDataRef.current = mergeCarsData(carsData2, carsDataRef.current);
+
+    const laps = lapsRef.current;
+    const stints = stintsRef.current;
+    const positions = positionsRef.current;
+    const carsData = carsDataRef.current;
+    const raceControlsData = raceControlsRef.current;
 
     const lastDriverData: LeaderboardDriver[] = getDriversData(
       localRace.session,
@@ -129,7 +154,7 @@ export default function Home() {
     if (localRace) {
       leaderboardDataRef.current = {
         ...localRace,
-        currentLap: lapsRef.current[0]?.lapNumber || 0,
+        currentLap: laps[0]?.lapNumber || 0,
         currentFlag: raceControlsData[0]?.flag || "GREEN",
         drivers: lastDriverData,
       };
@@ -155,7 +180,7 @@ export default function Home() {
         lapDuration: lap.lapDuration,
       }))
       .filter((lap) => lap.lapDuration > 0)
-      .sort((a, b) => a.lapDuration - b.lapDuration)[0];
+      .toSorted((a, b) => a.lapDuration - b.lapDuration)[0];
 
     for (let driver of drivers) {
       if (DRIVERS[driver.driverNumber]) {
@@ -205,7 +230,7 @@ export default function Home() {
         logo: driver.teamName?.replaceAll(" ", "").toLowerCase(),
         currentLap: lastLap?.lapNumber || 0,
         stints: driverStints,
-        position: currentPos ?? DEFAULT_POSITION,
+        position: currentPos,
         positionTrend: posTrend,
         hasBestLap: bestLap?.driverNumber === driver.driverNumber,
       });
@@ -220,7 +245,7 @@ export default function Home() {
     raceAboutToStart: boolean
   ) => {
     if (sessionType === "Race" || raceAboutToStart) {
-      drivers.sort((a, b) => a.position - b.position);
+      drivers.sort((a, b) => (a.position || 0) - (b.position || 0));
     } else {
       drivers = drivers
         .sort((a, b) => {
@@ -237,8 +262,13 @@ export default function Home() {
           return {
             ...d,
             position: i + 1,
-            positionTrend:
-              i + 1 < d.position ? "UP" : i + 1 > d.position ? "DOWN" : "SAME",
+            positionTrend: !d.position
+              ? "SAME"
+              : i + 1 < d.position
+              ? "UP"
+              : i + 1 > d.position
+              ? "DOWN"
+              : "SAME",
           };
         });
     }
