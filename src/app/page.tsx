@@ -24,6 +24,7 @@ import TableRadioTeams from "@components/TableRadioTeams";
 import TableRaceControls from "@components/TableRaceControls";
 import {RaceControl} from "@services/raceControl/types";
 import SkeletonLeaderboard from "@components/Leaderboard/components/SkeletonLeaderboard";
+import SkeletonDriverData from "@components/DriverData/SkeletonDriverData";
 
 export default function Home() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>();
@@ -167,11 +168,13 @@ export default function Home() {
       </SkeletonLeaderboard>
 
       <div className="flex flex-col flex-1 min-h-0 h-auto lg:h-dvh">
-        <DriverData
-          driver={leaderboardData?.drivers.find(
-            (driver) => driver.driverNumber === selectedDriver
-          )}
-        />
+        <SkeletonDriverData isLoading={leaderboardData === undefined}>
+          <DriverData
+            driver={leaderboardData?.drivers.find(
+              (driver) => driver.driverNumber === selectedDriver
+            )}
+          />
+        </SkeletonDriverData>
         <div className="flex flex-row flex-1 min-h-0 h-auto lg:h-100 flex-wrap lg:flex-nowrap">
           <TableRaceControls
             raceControls={raceControls}
